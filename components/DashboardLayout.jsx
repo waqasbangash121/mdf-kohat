@@ -6,9 +6,7 @@ import {
   Circle, 
   Milk, 
   Users, 
-  Settings, 
   BarChart, 
-  ArrowRight,
   Sparkles,
   DollarSign
 } from 'lucide-react'
@@ -27,11 +25,10 @@ export default function DashboardLayout({ children, title }) {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart, color: 'text-blue-600', path: '/' },
-    { id: 'cattle', label: 'Cattle Management', icon: Circle, color: 'text-green-600', path: '/cattle' },
-    { id: 'milk', label: 'Milk Production', icon: Milk, color: 'text-purple-600', path: '/milk' },
-    { id: 'staff', label: 'Staff Management', icon: Users, color: 'text-indigo-600', path: '/staff' },
-    { id: 'cashflow', label: 'Cash Flow', icon: DollarSign, color: 'text-emerald-600', path: '/cashflow' },
-    { id: 'settings', label: 'Settings', icon: Settings, color: 'text-gray-600', path: '/settings' },
+    { id: 'cattle', label: 'Cattle', icon: Circle, color: 'text-green-600', path: '/cattle' },
+    { id: 'milk', label: 'Milk', icon: Milk, color: 'text-purple-600', path: '/milk' },
+    { id: 'staff', label: 'Staff', icon: Users, color: 'text-indigo-600', path: '/staff' },
+    { id: 'cashflow', label: 'Cash', icon: DollarSign, color: 'text-emerald-600', path: '/cashflow' },
   ]
 
   const handleNavigation = (item) => {
@@ -39,10 +36,10 @@ export default function DashboardLayout({ children, title }) {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Enhanced Sidebar */}
-      <div className="w-64 bg-white shadow-xl border-r border-gray-100">
-        <div className="p-6 border-b border-gray-100">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-4 sticky top-0 z-30">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" />
@@ -52,9 +49,22 @@ export default function DashboardLayout({ children, title }) {
               <p className="text-sm text-gray-500">Management System</p>
             </div>
           </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">
+              {menuItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
+            </h2>
+          </div>
         </div>
-        
-        <nav className="mt-6 px-4">
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-hidden">
+        {children}
+      </main>
+
+      {/* Bottom Navigation */}
+      <nav className="bg-white border-t border-gray-200 shadow-lg">
+        <div className="flex justify-around items-center px-2 py-2">
           {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = activeTab === item.id
@@ -62,33 +72,29 @@ export default function DashboardLayout({ children, title }) {
               <button
                 key={item.id}
                 onClick={() => handleNavigation(item)}
-                className={`group w-full flex items-center px-4 py-3 mb-2 text-left rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
+                className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl transition-all duration-200 min-w-0 flex-1 ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 shadow-sm border border-blue-100'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <div className={`p-2 rounded-lg mr-3 transition-colors ${
+                <div className={`p-2 rounded-lg transition-all duration-200 ${
                   isActive 
-                    ? 'bg-white shadow-sm' 
-                    : 'group-hover:bg-white group-hover:shadow-sm'
+                    ? 'bg-blue-100 shadow-sm' 
+                    : 'group-hover:bg-gray-100'
                 }`}>
-                  <Icon className={`w-4 h-4 ${isActive ? item.color : 'text-gray-500'}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
                 </div>
-                <span className="font-medium">{item.label}</span>
-                {isActive && (
-                  <ArrowRight className="w-4 h-4 ml-auto text-blue-500" />
-                )}
+                <span className={`text-xs font-medium mt-1 transition-all duration-200 ${
+                  isActive ? 'text-blue-600' : 'text-gray-500'
+                }`}>
+                  {item.label}
+                </span>
               </button>
             )
           })}
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {children}
-      </div>
+        </div>
+      </nav>
     </div>
   )
 } 
