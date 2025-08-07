@@ -203,13 +203,13 @@ export default function CashFlow() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-        {/* Enhanced Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Cash Flow Management</h1>
-            <p className="text-gray-600">Track income, expenses, and financial performance of your dairy farm (in PKR)</p>
-            <div className="flex items-center mt-3 space-x-4">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
+        {/* Enhanced Header - Mobile Responsive */}
+        <div className="flex flex-col gap-4">
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Cash Flow Management</h1>
+            <p className="text-sm sm:text-base text-gray-600">Track income, expenses, and financial performance of your dairy farm (in PKR)</p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3">
               <div className="flex items-center text-sm text-gray-500">
                 <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
                 <span>+{financialSummary.profitMargin}% profit margin</span>
@@ -220,11 +220,11 @@ export default function CashFlow() {
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
             <select 
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
             >
               <option value="week">This Week</option>
               <option value="month">This Month</option>
@@ -233,7 +233,7 @@ export default function CashFlow() {
             </select>
             <button 
               onClick={() => setShowAddTransaction(true)}
-              className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-2.5 rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-4 sm:px-6 py-2.5 rounded-xl hover:from-emerald-700 hover:to-green-700 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Transaction
@@ -241,9 +241,9 @@ export default function CashFlow() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation - Mobile Responsive with Horizontal Scroll */}
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8">
+          <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
             {[
               { id: 'overview', label: 'Overview', icon: BarChart3 },
               { id: 'income', label: 'Income', icon: TrendingUp },
@@ -255,13 +255,13 @@ export default function CashFlow() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  className={`flex items-center py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-emerald-500 text-emerald-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <Icon className="w-4 h-4 mr-2" />
+                  <Icon className="w-4 h-4 mr-1 sm:mr-2" />
                   {tab.label}
                 </button>
               )
@@ -271,114 +271,114 @@ export default function CashFlow() {
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Financial Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 rounded-2xl text-white">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Financial Summary Cards - Mobile Responsive Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 sm:p-6 rounded-2xl text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-green-100 text-sm">Total Income</p>
-                    <p className="text-2xl font-bold mt-1">{formatCurrency(financialSummary.totalIncome)}</p>
+                    <p className="text-green-100 text-xs sm:text-sm">Total Income</p>
+                    <p className="text-lg sm:text-2xl font-bold mt-1">{formatCurrency(financialSummary.totalIncome)}</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <TrendingUp className="w-6 h-6" />
+                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
-                <div className="mt-4 flex items-center">
-                  <ArrowUpRight className="w-4 h-4 mr-1" />
-                  <span className="text-sm">+12.5% from last month</span>
+                <div className="mt-3 sm:mt-4 flex items-center">
+                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span className="text-xs sm:text-sm">+12.5% from last month</span>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-red-500 to-pink-600 p-6 rounded-2xl text-white">
+              <div className="bg-gradient-to-r from-red-500 to-pink-600 p-4 sm:p-6 rounded-2xl text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-red-100 text-sm">Total Expenses</p>
-                    <p className="text-2xl font-bold mt-1">{formatCurrency(financialSummary.totalExpenses)}</p>
+                    <p className="text-red-100 text-xs sm:text-sm">Total Expenses</p>
+                    <p className="text-lg sm:text-2xl font-bold mt-1">{formatCurrency(financialSummary.totalExpenses)}</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <TrendingDown className="w-6 h-6" />
+                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl">
+                    <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
-                <div className="mt-4 flex items-center">
-                  <ArrowDownRight className="w-4 h-4 mr-1" />
-                  <span className="text-sm">+8.2% from last month</span>
+                <div className="mt-3 sm:mt-4 flex items-center">
+                  <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span className="text-xs sm:text-sm">+8.2% from last month</span>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-2xl text-white">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-4 sm:p-6 rounded-2xl text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100 text-sm">Net Profit</p>
-                    <p className="text-2xl font-bold mt-1">{formatCurrency(financialSummary.netProfit)}</p>
+                    <p className="text-blue-100 text-xs sm:text-sm">Net Profit</p>
+                    <p className="text-lg sm:text-2xl font-bold mt-1">{formatCurrency(financialSummary.netProfit)}</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <DollarSign className="w-6 h-6" />
+                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl">
+                    <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
-                <div className="mt-4 flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  <span className="text-sm">+18.7% from last month</span>
+                <div className="mt-3 sm:mt-4 flex items-center">
+                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span className="text-xs sm:text-sm">+18.7% from last month</span>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-purple-500 to-violet-600 p-6 rounded-2xl text-white">
+              <div className="bg-gradient-to-r from-purple-500 to-violet-600 p-4 sm:p-6 rounded-2xl text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-purple-100 text-sm">Profit Margin</p>
-                    <p className="text-2xl font-bold mt-1">{financialSummary.profitMargin}%</p>
+                    <p className="text-purple-100 text-xs sm:text-sm">Profit Margin</p>
+                    <p className="text-lg sm:text-2xl font-bold mt-1">{financialSummary.profitMargin}%</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <Target className="w-6 h-6" />
+                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl">
+                    <Target className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
-                <div className="mt-4 flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  <span className="text-sm">+3.2% from last month</span>
+                <div className="mt-3 sm:mt-4 flex items-center">
+                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span className="text-xs sm:text-sm">+3.2% from last month</span>
                 </div>
               </div>
             </div>
 
             {/* Income vs Expenses Chart Placeholder */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-800">Monthly Trend</h3>
-                <button className="text-blue-600 hover:text-blue-700 flex items-center text-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Monthly Trend</h3>
+                <button className="text-blue-600 hover:text-blue-700 flex items-center text-sm self-start sm:self-auto">
                   <Download className="w-4 h-4 mr-1" />
                   Export
                 </button>
               </div>
-              <div className="h-64 bg-gradient-to-t from-gray-50 to-white rounded-xl flex items-center justify-center border-2 border-dashed border-gray-200">
+              <div className="h-48 sm:h-64 bg-gradient-to-t from-gray-50 to-white rounded-xl flex items-center justify-center border-2 border-dashed border-gray-200">
                 <div className="text-center">
-                  <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Income vs Expenses Chart</p>
-                  <p className="text-sm text-gray-400">Chart integration coming soon</p>
+                  <BarChart3 className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm sm:text-base text-gray-500">Income vs Expenses Chart</p>
+                  <p className="text-xs sm:text-sm text-gray-400">Chart integration coming soon</p>
                 </div>
               </div>
             </div>
 
-            {/* Category Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Category Breakdown - Mobile Responsive */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Income Categories */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-800 mb-6">Income Sources</h3>
-                <div className="space-y-4">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 sm:mb-6">Income Sources</h3>
+                <div className="space-y-3 sm:space-y-4">
                   {incomeCategories.map((category, index) => {
                     const Icon = category.icon
                     return (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 ${category.color} rounded-lg`}>
-                            <Icon className="w-4 h-4 text-white" />
+                      <div key={index} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-2 sm:space-x-3">
+                          <div className={`p-1.5 sm:p-2 ${category.color} rounded-lg`}>
+                            <Icon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-800">{category.name}</p>
-                            <p className="text-sm text-gray-500">{category.transactions} transactions</p>
+                            <p className="font-medium text-gray-800 text-sm sm:text-base">{category.name}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">{category.transactions} transactions</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-gray-800">{formatCurrency(category.amount)}</p>
-                          <p className="text-sm text-gray-500">{category.percentage}%</p>
+                          <p className="font-semibold text-gray-800 text-sm sm:text-base">{formatCurrency(category.amount)}</p>
+                          <p className="text-xs sm:text-sm text-gray-500">{category.percentage}%</p>
                         </div>
                       </div>
                     )
@@ -387,25 +387,25 @@ export default function CashFlow() {
               </div>
 
               {/* Expense Categories */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-800 mb-6">Expense Categories</h3>
-                <div className="space-y-4">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 sm:mb-6">Expense Categories</h3>
+                <div className="space-y-3 sm:space-y-4">
                   {expenseCategories.map((category, index) => {
                     const Icon = category.icon
                     return (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 ${category.color} rounded-lg`}>
-                            <Icon className="w-4 h-4 text-white" />
+                      <div key={index} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-2 sm:space-x-3">
+                          <div className={`p-1.5 sm:p-2 ${category.color} rounded-lg`}>
+                            <Icon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-800">{category.name}</p>
-                            <p className="text-sm text-gray-500">{category.transactions} transactions</p>
+                            <p className="font-medium text-gray-800 text-sm sm:text-base">{category.name}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">{category.transactions} transactions</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-gray-800">{formatCurrency(category.amount)}</p>
-                          <p className="text-sm text-gray-500">{category.percentage}%</p>
+                          <p className="font-semibold text-gray-800 text-sm sm:text-base">{formatCurrency(category.amount)}</p>
+                          <p className="text-xs sm:text-sm text-gray-500">{category.percentage}%</p>
                         </div>
                       </div>
                     )
@@ -418,9 +418,9 @@ export default function CashFlow() {
 
         {/* Recent Transactions */}
         {activeTab === 'transactions' && (
-          <div className="space-y-6">
-            {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-4">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Search and Filter - Mobile Responsive */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
@@ -428,13 +428,13 @@ export default function CashFlow() {
                   placeholder="Search transactions..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 w-full border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+                  className="pl-10 pr-4 py-2.5 w-full border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
               <select 
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">All Categories</option>
                 <option value="income">Income Only</option>
@@ -446,46 +446,46 @@ export default function CashFlow() {
               </select>
             </div>
 
-            {/* Transactions List */}
+            {/* Transactions List - Mobile Responsive */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-800">Recent Transactions</h3>
+              <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Recent Transactions</h3>
               </div>
               <div className="divide-y divide-gray-100">
                 {recentTransactions.map((transaction) => {
                   const TransactionIcon = getTransactionIcon(transaction.type)
                   return (
-                    <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className={`p-2 rounded-xl ${getTransactionBg(transaction.type)}`}>
-                            <TransactionIcon className={`w-5 h-5 ${getTransactionColor(transaction.type)}`} />
+                    <div key={transaction.id} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                        <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                          <div className={`p-2 rounded-xl ${getTransactionBg(transaction.type)} flex-shrink-0`}>
+                            <TransactionIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${getTransactionColor(transaction.type)}`} />
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-800">{transaction.description}</p>
-                            <div className="flex items-center space-x-4 mt-1">
-                              <span className="text-sm text-gray-500">{transaction.category}</span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500">{transaction.date} at {transaction.time}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-800 text-sm sm:text-base">{transaction.description}</p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1">
+                              <span className="text-xs sm:text-sm text-gray-500">{transaction.category}</span>
+                              <span className="hidden sm:inline text-sm text-gray-400">•</span>
+                              <span className="text-xs sm:text-sm text-gray-500">{transaction.date} at {transaction.time}</span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
                           <div className="text-right">
-                            <p className={`font-semibold ${getTransactionColor(transaction.type)}`}>
+                            <p className={`font-semibold ${getTransactionColor(transaction.type)} text-sm sm:text-base`}>
                               {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                             </p>
-                            <p className="text-sm text-gray-500">ID: {transaction.id}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">ID: {transaction.id}</p>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                              <Eye className="w-4 h-4" />
+                          <div className="flex items-center space-x-1 sm:space-x-2">
+                            <button className="p-1.5 sm:p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                              <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                             </button>
-                            <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
-                              <Edit className="w-4 h-4" />
+                            <button className="p-1.5 sm:p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                              <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                             </button>
-                            <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                              <Trash2 className="w-4 h-4" />
+                            <button className="p-1.5 sm:p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                             </button>
                           </div>
                         </div>
@@ -498,15 +498,15 @@ export default function CashFlow() {
           </div>
         )}
 
-        {/* Add Transaction Modal would go here */}
+        {/* Add Transaction Modal - Mobile Responsive */}
         {showAddTransaction && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Add New Transaction</h3>
               <p className="text-gray-600 mb-4">Transaction form coming soon...</p>
               <button 
                 onClick={() => setShowAddTransaction(false)}
-                className="w-full bg-emerald-600 text-white py-2 rounded-xl hover:bg-emerald-700 transition-colors"
+                className="w-full bg-emerald-600 text-white py-2.5 rounded-xl hover:bg-emerald-700 transition-colors text-sm sm:text-base"
               >
                 Close
               </button>

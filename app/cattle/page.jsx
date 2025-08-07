@@ -187,64 +187,65 @@ export default function CattleManagement() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-      {/* Enhanced Header */}
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
+      {/* Enhanced Header - Mobile Responsive */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Cattle Management</h1>
-          <p className="text-gray-600">Manage your cattle inventory and track their details</p>
-          <div className="flex items-center mt-3 space-x-4">
-            <div className="flex items-center text-sm text-gray-500">
-              <Circle className="w-4 h-4 mr-1 text-green-500" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Cattle Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage your cattle inventory and track their details</p>
+          <div className="flex flex-wrap items-center mt-3 gap-2 sm:gap-4">
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <Circle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-green-500" />
               <span>{cattleData.length} Total Cattle</span>
             </div>
-            <div className="flex items-center text-sm text-gray-500">
-              <DollarSign className="w-4 h-4 mr-1 text-blue-500" />
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-blue-500" />
               <span>₨{cattleData.reduce((sum, c) => sum + c.price, 0).toLocaleString()}</span>
             </div>
-            <div className="flex items-center text-sm text-gray-500">
-              <Award className="w-4 h-4 mr-1 text-purple-500" />
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <Award className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-purple-500" />
               <span>{Math.round(cattleData.reduce((sum, c) => sum + c.age, 0) / cattleData.length)} Avg. Age</span>
             </div>
           </div>
         </div>
         <button 
           onClick={() => setShowAddForm(true)}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 flex items-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
         >
-          <Plus className="w-5 h-5 mr-2" />
-          Add New Cattle
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+          <span className="hidden sm:inline">Add New Cattle</span>
+          <span className="sm:hidden">Add Cattle</span>
         </button>
       </div>
 
-      {/* Enhanced Filters and Search */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex flex-col lg:flex-row gap-4">
+      {/* Enhanced Filters and Search - Mobile Responsive */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex flex-col gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <input
               type="text"
               placeholder="Search by name, ID, or type..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 sm:pl-12 pr-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
             />
           </div>
-          <div className="flex gap-3">
-            <button className="px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 flex items-center transition-all duration-200">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <button className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl hover:bg-gray-50 flex items-center justify-center transition-all duration-200 text-sm">
               <Filter className="w-4 h-4 mr-2" />
               More Filters
             </button>
             <div className="flex border border-gray-200 rounded-xl overflow-hidden">
               <button 
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-3 transition-all duration-200 ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
+                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 transition-all duration-200 text-sm ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
               >
                 Grid
               </button>
               <button 
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-3 transition-all duration-200 ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
+                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 transition-all duration-200 text-sm ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
               >
                 List
               </button>
@@ -253,57 +254,57 @@ export default function CattleManagement() {
         </div>
       </div>
 
-      {/* Enhanced Cattle Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Enhanced Cattle Grid - Mobile Responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredCattle.map((cattle) => (
-          <div key={cattle.id} className="group bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+          <div key={cattle.id} className="group bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
             {/* Cattle Avatar */}
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Circle className="w-8 h-8 text-blue-600" />
+            <div className="flex items-start justify-between mb-4 sm:mb-6">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Circle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
                     {cattle.name}
                   </h3>
-                  <p className="text-sm text-gray-500">ID: {cattle.id}</p>
+                  <p className="text-xs sm:text-sm text-gray-500">ID: {cattle.id}</p>
                 </div>
               </div>
               <div className="flex space-x-1">
-                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
-                  <Eye className="w-4 h-4" />
+                <button className="p-1.5 sm:p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
                 <button 
                   onClick={() => handleEditCattle(cattle)}
-                  className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
+                  className="p-1.5 sm:p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
-                <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
-                  <MoreVertical className="w-4 h-4" />
+                <button className="p-1.5 sm:p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+                  <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </div>
             </div>
 
             {/* Cattle Details */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-3 rounded-xl">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="bg-gray-50 p-2 sm:p-3 rounded-xl">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1">{cattle.type}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-1">{cattle.type}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-xl">
+                <div className="bg-gray-50 p-2 sm:p-3 rounded-xl">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Age</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1">{cattle.age} years</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-1">{cattle.age} years</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-xl">
+                <div className="bg-gray-50 p-2 sm:p-3 rounded-xl">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Price</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1">₨{cattle.price.toLocaleString()}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-1">₨{cattle.price.toLocaleString()}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-xl">
+                <div className="bg-gray-50 p-2 sm:p-3 rounded-xl">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Date Added</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1">{formatDate(cattle.dateAdded)}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-1">{formatDate(cattle.dateAdded)}</p>
                 </div>
               </div>
             </div>
@@ -311,14 +312,14 @@ export default function CattleManagement() {
         ))}
       </div>
 
-      {/* Enhanced Empty State */}
+      {/* Enhanced Empty State - Mobile Responsive */}
       {filteredCattle.length === 0 && (
-        <div className="text-center py-16">
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Circle className="w-12 h-12 text-blue-600" />
+        <div className="text-center py-8 sm:py-16 px-4">
+          <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <Circle className="w-8 h-8 sm:w-12 sm:h-12 text-blue-600" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No cattle found</h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No cattle found</h3>
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto">
             {searchTerm 
               ? 'Try adjusting your search criteria to find what you&apos;re looking for.'
               : 'Get started by adding your first cattle to begin managing your farm.'
@@ -326,39 +327,39 @@ export default function CattleManagement() {
           </p>
           <button 
             onClick={() => setShowAddForm(true)}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5 mr-2 inline" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 inline" />
             Add New Cattle
           </button>
         </div>
       )}
 
-      {/* Add New Cattle Modal */}
+      {/* Add New Cattle Modal - Mobile Responsive */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">Add New Cattle</h3>
-                  <p className="text-sm text-gray-500">Enter the details for your new cattle</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">Add New Cattle</h3>
+                  <p className="text-xs sm:text-sm text-gray-500">Enter the details for your new cattle</p>
                 </div>
               </div>
               <button
                 onClick={handleCloseForm}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Cattle Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -374,7 +375,7 @@ export default function CattleManagement() {
                   onChange={handleInputChange}
                   placeholder="Enter cattle name or ID number"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
@@ -393,7 +394,7 @@ export default function CattleManagement() {
                   onChange={handleInputChange}
                   placeholder="Enter cattle type or breed (e.g., Jersey, Holstein)"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
                 <p className="text-xs text-gray-500">Enter the type or breed of the cattle</p>
               </div>
@@ -407,7 +408,7 @@ export default function CattleManagement() {
                   </div>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">₨</span>
+                  <span className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">₨</span>
                   <input
                     type="number"
                     name="price"
@@ -417,7 +418,7 @@ export default function CattleManagement() {
                     min="0"
                     step="1"
                     required
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   />
                 </div>
                 <p className="text-xs text-gray-500">Enter the purchase price in Pakistani Rupees (PKR)</p>
@@ -440,7 +441,7 @@ export default function CattleManagement() {
                   min="0"
                   max="20"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
@@ -458,23 +459,23 @@ export default function CattleManagement() {
                   value={formData.dateAdded}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
                 <p className="text-xs text-gray-500">Select the date when the cattle was added to your farm</p>
               </div>
 
               {/* Form Actions */}
-              <div className="flex space-x-3 pt-4 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={handleCloseForm}
-                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm sm:text-base"
                 >
                   Add Cattle
                 </button>
@@ -484,31 +485,31 @@ export default function CattleManagement() {
         </div>
       )}
 
-      {/* Edit Cattle Modal */}
+      {/* Edit Cattle Modal - Mobile Responsive */}
       {showEditForm && editingCattle && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
-                  <Edit className="w-5 h-5 text-green-600" />
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
+                  <Edit className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">Edit Cattle</h3>
-                  <p className="text-sm text-gray-500">Update the details for {editingCattle.name}</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">Edit Cattle</h3>
+                  <p className="text-xs sm:text-sm text-gray-500">Update the details for {editingCattle.name}</p>
                 </div>
               </div>
               <button
                 onClick={handleCloseEditForm}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleEditSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleEditSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Cattle Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -524,7 +525,7 @@ export default function CattleManagement() {
                   onChange={handleInputChange}
                   placeholder="Enter cattle name or ID number"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
@@ -543,7 +544,7 @@ export default function CattleManagement() {
                   onChange={handleInputChange}
                   placeholder="Enter cattle type or breed (e.g., Jersey, Holstein)"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
                 <p className="text-xs text-gray-500">Enter the type or breed of the cattle</p>
               </div>
@@ -557,7 +558,7 @@ export default function CattleManagement() {
                   </div>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">₨</span>
+                  <span className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">₨</span>
                   <input
                     type="number"
                     name="price"
@@ -567,7 +568,7 @@ export default function CattleManagement() {
                     min="0"
                     step="1"
                     required
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   />
                 </div>
                 <p className="text-xs text-gray-500">Enter the purchase price in Pakistani Rupees (PKR)</p>
@@ -590,7 +591,7 @@ export default function CattleManagement() {
                   min="0"
                   max="20"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
@@ -608,23 +609,23 @@ export default function CattleManagement() {
                   value={formData.dateAdded}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
                 <p className="text-xs text-gray-500">Select the date when the cattle was added to your farm</p>
               </div>
 
               {/* Form Actions */}
-              <div className="flex space-x-3 pt-4 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={handleCloseEditForm}
-                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm sm:text-base"
                 >
                   Save Changes
                 </button>
