@@ -376,7 +376,6 @@ export default function CattleManagement() {
                   required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
-                <p className="text-xs text-gray-500">Can be a name (e.g., "Bessie") or ID number (e.g., "1234")</p>
               </div>
 
               {/* Cattle Type */}
@@ -527,7 +526,6 @@ export default function CattleManagement() {
                   required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
-                <p className="text-xs text-gray-500">Can be a name (e.g., "Bessie") or ID number (e.g., "1234")</p>
               </div>
 
               {/* Cattle Type */}
