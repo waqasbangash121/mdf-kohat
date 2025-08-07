@@ -4,7 +4,6 @@ import { useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import { 
   Milk, 
-  Plus, 
   Calendar, 
   TrendingUp, 
   BarChart,
@@ -12,23 +11,12 @@ import {
   Filter,
   Target,
   Award,
-  Clock,
-  Droplets,
-  X,
-  DollarSign,
-  Scale
+  Clock
 } from 'lucide-react'
 
 export default function MilkProduction() {
   const [selectedPeriod, setSelectedPeriod] = useState('week')
   const [selectedCattle, setSelectedCattle] = useState('all')
-  const [showProductionForm, setShowProductionForm] = useState(false)
-  const [formData, setFormData] = useState({
-    quantity: '',
-    date: new Date().toISOString().split('T')[0],
-    pricePerLitre: '',
-    session: 'morning'
-  })
 
   const productionData = [
     { date: '2024-01-15', total: 2450, average: 2.8, sessions: 2, quality: 'A+', temperature: 4.2 },
@@ -52,54 +40,6 @@ export default function MilkProduction() {
       case 'B': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
-  }
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log('New milk production data:', formData)
-    
-    // Add new production record to the list (in a real app, this would be handled by backend)
-    const newRecord = {
-      date: formData.date,
-      total: parseFloat(formData.quantity),
-      average: parseFloat(formData.quantity),
-      sessions: 1,
-      quality: 'A',
-      temperature: 4.0,
-      pricePerLitre: parseFloat(formData.pricePerLitre),
-      session: formData.session
-    }
-    
-    // Reset form and close modal
-    setFormData({
-      quantity: '',
-      date: new Date().toISOString().split('T')[0],
-      pricePerLitre: '',
-      session: 'morning'
-    })
-    setShowProductionForm(false)
-    
-    // Show success message (you could add a toast notification here)
-    alert('Milk production recorded successfully!')
-  }
-
-  const handleCloseForm = () => {
-    setFormData({
-      quantity: '',
-      date: new Date().toISOString().split('T')[0],
-      pricePerLitre: '',
-      session: 'morning'
-    })
-    setShowProductionForm(false)
   }
 
   return (
@@ -130,14 +70,6 @@ export default function MilkProduction() {
             <Download className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Export Data</span>
             <span className="sm:hidden">Export</span>
-          </button>
-          <button 
-            onClick={() => setShowProductionForm(true)}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
-          >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-            <span className="hidden sm:inline">Record Production</span>
-            <span className="sm:hidden">Record</span>
           </button>
         </div>
       </div>
@@ -285,132 +217,6 @@ export default function MilkProduction() {
           </div>
         </div>
       </div>
-
-      {/* Milk Production Form Modal - Mobile Responsive */}
-      {showProductionForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
-                  <Milk className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">Record Milk Production</h3>
-                  <p className="text-xs sm:text-sm text-gray-500">Enter the details for today&apos;s production</p>
-                </div>
-              </div>
-              <button
-                onClick={handleCloseForm}
-                className="p-1 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
-              >
-                <X className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-              {/* Quantity */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Scale className="w-4 h-4 text-gray-400" />
-                    <span>Quantity (Litres)</span>
-                  </div>
-                </label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  placeholder="Enter quantity in litres"
-                  step="0.1"
-                  min="0"
-                  required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                />
-              </div>
-
-              {/* Date */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span>Date</span>
-                  </div>
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                />
-              </div>
-
-              {/* Price per Litre */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-gray-400" />
-                    <span>Price per Litre (PKR)</span>
-                  </div>
-                </label>
-                <input
-                  type="number"
-                  name="pricePerLitre"
-                  value={formData.pricePerLitre}
-                  onChange={handleInputChange}
-                  placeholder="Enter price per litre"
-                  step="0.01"
-                  min="0"
-                  required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                />
-              </div>
-
-              {/* Session */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <span>Session</span>
-                  </div>
-                </label>
-                <select
-                  name="session"
-                  value={formData.session}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
-                >
-                  <option value="morning">Morning</option>
-                  <option value="evening">Evening</option>
-                </select>
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={handleCloseForm}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium text-sm sm:text-base"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm sm:text-base"
-                >
-                  Record Production
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
       </div>
     </DashboardLayout>
   )

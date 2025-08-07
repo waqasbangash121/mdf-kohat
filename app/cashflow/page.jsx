@@ -26,7 +26,8 @@ import {
   ShoppingCart,
   ArrowUpRight,
   ArrowDownRight,
-  Target
+  Target,
+  X
 } from 'lucide-react'
 
 export default function CashFlow() {
@@ -36,6 +37,76 @@ export default function CashFlow() {
   const [transactionType, setTransactionType] = useState('income')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
+
+  // Form state variables
+  const [formData, setFormData] = useState({
+    transactionName: '',
+    transactionType: '', // 'income' or 'expense'
+    category: '',
+    cattleAction: '', // Buy or Sell for cattle
+    selectedCattle: '', // For cattle selection
+    cattleType: '', // For new cattle type
+    cattleAge: '', // For new cattle age
+    amount: '',
+    date: '',
+    litres: '', // For milk transactions
+    pricePerLitre: '',
+    session: '', // Morning or Evening for milk
+    selectedStaff: '', // For staff salary
+  })
+
+  // Sample staff data
+  const staffMembers = [
+    { id: 1, name: 'Ahmed Khan', position: 'Farm Manager' },
+    { id: 2, name: 'Muhammad Ali', position: 'Milk Collector' },
+    { id: 3, name: 'Fatima Bibi', position: 'Cattle Caretaker' },
+    { id: 4, name: 'Hassan Raza', position: 'Driver' },
+    { id: 5, name: 'Ayesha Khan', position: 'Accountant' }
+  ]
+
+  // Sample cattle data - convert to state for dynamic updates
+  const [cattleData, setCattleData] = useState([
+    {
+      id: '1234',
+      name: 'Bessie',
+      type: 'Jersey',
+      age: 4,
+      price: 150000,
+      dateAdded: '2024-01-15'
+    },
+    {
+      id: '1235',
+      name: 'Daisy',
+      type: 'Holstein',
+      age: 6,
+      price: 180000,
+      dateAdded: '2024-01-14'
+    },
+    {
+      id: '1236',
+      name: 'Molly',
+      type: 'Guernsey',
+      age: 3,
+      price: 120000,
+      dateAdded: '2024-01-13'
+    },
+    {
+      id: '1237',
+      name: 'Rosie',
+      type: 'Ayrshire',
+      age: 5,
+      price: 160000,
+      dateAdded: '2024-01-12'
+    },
+    {
+      id: '1238',
+      name: 'Buttercup',
+      type: 'Brown Swiss',
+      age: 7,
+      price: 200000,
+      dateAdded: '2024-01-11'
+    }
+  ])
 
   // Financial data (in PKR)
   const financialSummary = {
@@ -199,6 +270,415 @@ export default function CashFlow() {
 
   const getTransactionBg = (type) => {
     return type === 'income' ? 'bg-green-50' : 'bg-red-50'
+  }
+
+  const handleFormChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const resetForm = () => {
+    setFormData({
+      transactionName: '',
+      transactionType: '',
+      category: '',
+      cattleAction: '',
+      selectedCattle: '',
+      cattleType: '',
+      cattleAge: '',
+      amount: '',
+      date: '',
+      litres: '',
+      pricePerLitre: '',
+      session: '',
+      selectedStaff: '',
+    })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    
+    // If this is a "buy cattle" transaction, add the new cattle to the cattleData
+    if (formData.category === 'buy cattle') {
+      const newCattle = {
+        id: String(Date.now()), // Generate a unique ID
+        name: formData.transactionName || `Cattle-${Date.now()}`, // Use transaction name or generate one
+        type: formData.cattleType,
+        age: parseInt(formData.cattleAge),
+        price: parseInt(formData.amount),
+        dateAdded: formData.date
+      }
+      
+      // Add to cattleData using state setter
+      setCattleData(prevCattleData => [...prevCattleData, newCattle])
+      console.log('New cattle added:', newCattle)
+    }
+    
+    // If this is a "sell cattle" transaction, remove the cattle from cattleData
+    if (formData.category === 'sell cattle' && formData.selectedCattle) {
+      setCattleData(prevCattleData => {
+        const soldCattleIndex = prevCattleData.findIndex(cattle => cattle.id === formData.selectedCattle)
+        if (soldCattleIndex !== -1) {
+          const soldCattle = prevCattleData[soldCattleIndex]
+          console.log('Cattle sold and removed:', soldCattle)
+          return prevCattleData.filter((_, index) => index !== soldCattleIndex)
+        }
+        return prevCattleData
+      })
+    }
+    
+    // Here you would typically save the transaction to your backend
+    console.log('Transaction Data:', formData)
+    
+    // Reset form and close modal
+    resetForm()
+    setShowAddTransaction(false)
+  }
+
+  const renderFormFields = () => {
+    switch (formData.category) {
+      case 'sell cattle':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Cattle to Sell
+                </label>
+                <select
+                  value={formData.selectedCattle}
+                  onChange={(e) => handleFormChange('selectedCattle', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Cattle</option>
+                  {cattleData.map((cattle) => (
+                    <option key={cattle.id} value={cattle.id}>
+                      {cattle.name} - {cattle.type} (ID: {cattle.id})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sale Amount (PKR)
+                </label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => handleFormChange('amount', e.target.value)}
+                  placeholder="Enter sale amount in PKR"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sale Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          </>
+        )
+
+      case 'milk':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Litres
+                </label>
+                <input
+                  type="number"
+                  value={formData.litres}
+                  onChange={(e) => handleFormChange('litres', e.target.value)}
+                  placeholder="Enter number of litres"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price per Litre (PKR)
+                </label>
+                <input
+                  type="number"
+                  value={formData.pricePerLitre}
+                  onChange={(e) => handleFormChange('pricePerLitre', e.target.value)}
+                  placeholder="Enter price per litre"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date of Sale
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Session
+                </label>
+                <select
+                  value={formData.session}
+                  onChange={(e) => handleFormChange('session', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Session</option>
+                  <option value="morning">Morning</option>
+                  <option value="evening">Evening</option>
+                </select>
+              </div>
+            </div>
+          </>
+        )
+
+      case 'other income':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Amount (PKR)
+                </label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => handleFormChange('amount', e.target.value)}
+                  placeholder="Enter amount in PKR"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          </>
+        )
+
+      case 'buy cattle':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cattle Type/Breed
+                </label>
+                <input
+                  type="text"
+                  value={formData.cattleType}
+                  onChange={(e) => handleFormChange('cattleType', e.target.value)}
+                  placeholder="Enter cattle type (e.g., Jersey, Holstein, Guernsey)"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Age (years)
+                </label>
+                <input
+                  type="number"
+                  value={formData.cattleAge}
+                  onChange={(e) => handleFormChange('cattleAge', e.target.value)}
+                  placeholder="Enter age in years"
+                  min="0"
+                  max="20"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Purchase Amount (PKR)
+                </label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => handleFormChange('amount', e.target.value)}
+                  placeholder="Enter purchase amount in PKR"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Purchase Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          </>
+        )
+
+      case 'cattle food':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Amount (PKR)
+                </label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => handleFormChange('amount', e.target.value)}
+                  placeholder="Enter amount in PKR"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date of Transaction
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          </>
+        )
+
+      case 'staff salary':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Staff Member
+                </label>
+                <select
+                  value={formData.selectedStaff}
+                  onChange={(e) => handleFormChange('selectedStaff', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Staff Member</option>
+                  {staffMembers.map((staff) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.name} - {staff.position}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Amount Paid (PKR)
+                </label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => handleFormChange('amount', e.target.value)}
+                  placeholder="Enter salary amount"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          </>
+        )
+
+      case 'fuel expense':
+      case 'other expense':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Amount (PKR)
+                </label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => handleFormChange('amount', e.target.value)}
+                  placeholder="Enter amount in PKR"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date of Transaction
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          </>
+        )
+
+      default:
+        return null
+    }
   }
 
   return (
@@ -501,15 +981,111 @@ export default function CashFlow() {
         {/* Add Transaction Modal - Mobile Responsive */}
         {showAddTransaction && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Add New Transaction</h3>
-              <p className="text-gray-600 mb-4">Transaction form coming soon...</p>
-              <button 
-                onClick={() => setShowAddTransaction(false)}
-                className="w-full bg-emerald-600 text-white py-2.5 rounded-xl hover:bg-emerald-700 transition-colors text-sm sm:text-base"
-              >
-                Close
-              </button>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-800">Add New Transaction</h3>
+                <button 
+                  onClick={() => {
+                    setShowAddTransaction(false)
+                    resetForm()
+                  }}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Transaction Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Transaction Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.transactionName}
+                    onChange={(e) => handleFormChange('transactionName', e.target.value)}
+                    placeholder="Enter transaction name"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Transaction Type (Income/Expense) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Transaction Type
+                  </label>
+                  <select
+                    value={formData.transactionType}
+                    onChange={(e) => {
+                      handleFormChange('transactionType', e.target.value)
+                      handleFormChange('category', '') // Reset category when transaction type changes
+                    }}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select Transaction Type</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                  </select>
+                </div>
+
+                {/* Category based on Transaction Type */}
+                {formData.transactionType && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => handleFormChange('category', e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      {formData.transactionType === 'income' ? (
+                        <>
+                          <option value="sell cattle">Sell Cattle</option>
+                          <option value="milk">Milk</option>
+                          <option value="other income">Other</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="buy cattle">Buy Cattle</option>
+                          <option value="cattle food">Cattle Food</option>
+                          <option value="staff salary">Staff Salary</option>
+                          <option value="fuel expense">Fuel Expense</option>
+                          <option value="other expense">Other Expense</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
+                )}
+
+                {/* Dynamic Form Fields */}
+                {formData.category && renderFormFields()}
+
+                {/* Submit Button */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddTransaction(false)
+                      resetForm()
+                    }}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors"
+                  >
+                    Add Transaction
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
