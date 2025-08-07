@@ -13,12 +13,22 @@ import {
   Target,
   Award,
   Clock,
-  Droplets
+  Droplets,
+  X,
+  DollarSign,
+  Scale
 } from 'lucide-react'
 
 export default function MilkProduction() {
   const [selectedPeriod, setSelectedPeriod] = useState('week')
   const [selectedCattle, setSelectedCattle] = useState('all')
+  const [showProductionForm, setShowProductionForm] = useState(false)
+  const [formData, setFormData] = useState({
+    quantity: '',
+    date: new Date().toISOString().split('T')[0],
+    pricePerLitre: '',
+    session: 'morning'
+  })
 
   const productionData = [
     { date: '2024-01-15', total: 2450, average: 2.8, sessions: 2, quality: 'A+', temperature: 4.2 },
@@ -28,12 +38,6 @@ export default function MilkProduction() {
     { date: '2024-01-11', total: 2350, average: 2.7, sessions: 2, quality: 'A+', temperature: 4.2 },
     { date: '2024-01-10', total: 2480, average: 2.9, sessions: 2, quality: 'A', temperature: 4.1 },
     { date: '2024-01-09', total: 2420, average: 2.8, sessions: 2, quality: 'A+', temperature: 4.0 },
-  ]
-
-  const cattleProduction = [
-    { id: '1234', name: 'Bessie', breed: 'Jersey', today: 2.5, weekly: 17.5, monthly: 75.2, trend: '+8%', quality: 'A+' },
-    { id: '1235', name: 'Daisy', breed: 'Holstein', today: 3.2, weekly: 22.4, monthly: 96.8, trend: '+12%', quality: 'A' },
-    { id: '1236', name: 'Molly', breed: 'Guernsey', today: 2.8, weekly: 19.6, monthly: 84.3, trend: '+5%', quality: 'A+' },
   ]
 
   const totalToday = productionData[0]?.total || 0
@@ -48,6 +52,54 @@ export default function MilkProduction() {
       case 'B': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // Here you would typically send the data to your backend
+    console.log('New milk production data:', formData)
+    
+    // Add new production record to the list (in a real app, this would be handled by backend)
+    const newRecord = {
+      date: formData.date,
+      total: parseFloat(formData.quantity),
+      average: parseFloat(formData.quantity),
+      sessions: 1,
+      quality: 'A',
+      temperature: 4.0,
+      pricePerLitre: parseFloat(formData.pricePerLitre),
+      session: formData.session
+    }
+    
+    // Reset form and close modal
+    setFormData({
+      quantity: '',
+      date: new Date().toISOString().split('T')[0],
+      pricePerLitre: '',
+      session: 'morning'
+    })
+    setShowProductionForm(false)
+    
+    // Show success message (you could add a toast notification here)
+    alert('Milk production recorded successfully!')
+  }
+
+  const handleCloseForm = () => {
+    setFormData({
+      quantity: '',
+      date: new Date().toISOString().split('T')[0],
+      pricePerLitre: '',
+      session: 'morning'
+    })
+    setShowProductionForm(false)
   }
 
   return (
@@ -78,7 +130,10 @@ export default function MilkProduction() {
             <Download className="w-4 h-4 mr-2" />
             Export Data
           </button>
-          <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 flex items-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+          <button 
+            onClick={() => setShowProductionForm(true)}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 flex items-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+          >
             <Plus className="w-5 h-5 mr-2" />
             Record Production
           </button>
@@ -224,101 +279,131 @@ export default function MilkProduction() {
         </div>
       </div>
 
-      {/* Enhanced Individual Cattle Production */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-          <Droplets className="w-5 h-5 mr-2 text-green-500" />
-          Individual Cattle Performance
-        </h3>
-        <div className="space-y-4">
-          {cattleProduction.map((cattle) => (
-            <div key={cattle.id} className="group p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-200 border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <Milk className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-                      {cattle.name}
-                    </h4>
-                    <p className="text-sm text-gray-600">{cattle.breed} • ID: {cattle.id}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-6">
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-500">Today</p>
-                    <p className="text-lg font-bold text-gray-900">{cattle.today}L</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-500">This Week</p>
-                    <p className="text-lg font-bold text-gray-900">{cattle.weekly}L</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-500">This Month</p>
-                    <p className="text-lg font-bold text-gray-900">{cattle.monthly}L</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-500">Quality</p>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getQualityColor(cattle.quality)}`}>
-                      {cattle.quality}
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-500">Trend</p>
-                    <div className="flex items-center">
-                      <TrendingUp className="w-3 h-3 text-green-500 mr-1" />
-                      <span className="text-sm text-green-600 font-medium">{cattle.trend}</span>
-                    </div>
-                  </div>
-                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-all duration-200">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Enhanced Recent Production Records */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-          <Calendar className="w-5 h-5 mr-2 text-purple-500" />
-          Recent Production Records
-        </h3>
-        <div className="space-y-4">
-          {productionData.slice(0, 5).map((record, index) => (
-            <div key={index} className="group flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                  <Calendar className="w-5 h-5 text-purple-600" />
+      {/* Milk Production Form Modal */}
+      {showProductionForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
+                  <Milk className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-800">{record.date}</p>
-                  <p className="text-sm text-gray-600">{record.sessions} milking sessions • Temp: {record.temperature}°C</p>
+                  <h3 className="text-xl font-bold text-gray-800">Record Milk Production</h3>
+                  <p className="text-sm text-gray-500">Enter the details for today&apos;s production</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-6">
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-500">Total</p>
-                  <p className="text-lg font-bold text-gray-900">{record.total}L</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-500">Average</p>
-                  <p className="text-lg font-bold text-gray-900">{record.average}L</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-500">Quality</p>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getQualityColor(record.quality)}`}>
-                    {record.quality}
-                  </span>
-                </div>
-              </div>
+              <button
+                onClick={handleCloseForm}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-          ))}
+
+            {/* Modal Body */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Quantity */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <Scale className="w-4 h-4 text-gray-400" />
+                    <span>Quantity (Litres)</span>
+                  </div>
+                </label>
+                <input
+                  type="number"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleInputChange}
+                  placeholder="Enter quantity in litres"
+                  step="0.1"
+                  min="0"
+                  required
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+              </div>
+
+              {/* Date */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <span>Date</span>
+                  </div>
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+              </div>
+
+              {/* Price per Litre */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <DollarSign className="w-4 h-4 text-gray-400" />
+                    <span>Price per Litre (PKR)</span>
+                  </div>
+                </label>
+                <input
+                  type="number"
+                  name="pricePerLitre"
+                  value={formData.pricePerLitre}
+                  onChange={handleInputChange}
+                  placeholder="Enter price per litre"
+                  step="0.01"
+                  min="0"
+                  required
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+              </div>
+
+              {/* Session */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span>Session</span>
+                  </div>
+                </label>
+                <select
+                  name="session"
+                  value={formData.session}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="morning">Morning</option>
+                  <option value="evening">Evening</option>
+                </select>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex space-x-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={handleCloseForm}
+                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                >
+                  Record Production
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
       </div>
     </DashboardLayout>
   )

@@ -5,9 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { 
   Circle, 
   Milk, 
-  Activity, 
   Users, 
-  Calendar, 
   Settings, 
   BarChart, 
   ArrowRight,
@@ -31,9 +29,7 @@ export default function DashboardLayout({ children, title }) {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart, color: 'text-blue-600', path: '/' },
     { id: 'cattle', label: 'Cattle Management', icon: Circle, color: 'text-green-600', path: '/cattle' },
     { id: 'milk', label: 'Milk Production', icon: Milk, color: 'text-purple-600', path: '/milk' },
-    { id: 'health', label: 'Health Records', icon: Activity, color: 'text-red-600', path: '/health' },
     { id: 'staff', label: 'Staff Management', icon: Users, color: 'text-indigo-600', path: '/staff' },
-    { id: 'schedule', label: 'Schedule', icon: Calendar, color: 'text-orange-600', path: '/schedule' },
     { id: 'cashflow', label: 'Cash Flow', icon: DollarSign, color: 'text-emerald-600', path: '/cashflow' },
     { id: 'settings', label: 'Settings', icon: Settings, color: 'text-gray-600', path: '/settings' },
   ]
