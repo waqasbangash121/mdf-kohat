@@ -58,12 +58,12 @@ export default function DashboardLayout({ children, title }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-y-auto pb-20">
         {children}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="bg-white border-t border-gray-200 shadow-lg">
+      {/* Bottom Navigation - Sticky */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
         <div className="flex justify-around items-center px-2 py-2">
           {menuItems.map((item) => {
             const Icon = item.icon
