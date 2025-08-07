@@ -1,29 +1,24 @@
-import '../styles/globals.css';
-import { Footer } from '../components/footer';
-import { Header } from '../components/header';
+import { Inter } from 'next/font/google'
+import './globals.css'
+import ErrorBoundary from '../components/ErrorBoundary'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-    title: {
-        template: '%s | Netlify',
-        default: 'Netlify Starter'
-    }
-};
+  title: 'Dairy Farm Management System',
+  description: 'Comprehensive dairy farm management application for tracking cattle, milk production, health, and farm operations.',
+}
 
 export default function RootLayout({ children }) {
-    return (
-        <html lang="en">
-            <head>
-                <link rel="icon" href="/favicon.svg" sizes="any" />
-            </head>
-            <body className="antialiased text-white bg-blue-900">
-                <div className="flex flex-col min-h-screen px-6 bg-noise sm:px-12">
-                    <div className="flex flex-col w-full max-w-5xl mx-auto grow">
-                        <Header />
-                        <main className="grow">{children}</main>
-                        <Footer />
-                    </div>
-                </div>
-            </body>
-        </html>
-    );
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
+        <ErrorBoundary>
+          <div className="min-h-screen bg-gray-50">
+            {children}
+          </div>
+        </ErrorBoundary>
+      </body>
+    </html>
+  )
 }
