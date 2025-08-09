@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getCattle, getStaff, getTransactions } from '../lib/actions'
+// ...existing code...
 import DashboardLayout from '../components/DashboardLayout'
 import { 
   Circle, 
@@ -51,12 +51,16 @@ export default function Dashboard() {
     async function loadDashboardData() {
       setLoading(true)
       try {
-        const [cattle, staff, transactions] = await Promise.all([
-          getCattle(),
-          getStaff(),
-          getTransactions()
+        const [cattleRes, staffRes, transactionsRes] = await Promise.all([
+          fetch('/api/cattle'),
+          fetch('/api/staff'),
+          fetch('/api/transaction')
         ])
-        // Stats
+        const [cattle, staff, transactions] = await Promise.all([
+          cattleRes.json(),
+          staffRes.json(),
+          transactionsRes.json()
+        ])
         setStats([
           {
             title: 'Total Cattle',
@@ -91,7 +95,6 @@ export default function Dashboard() {
             bgGradient: 'from-red-50 to-red-100'
           }
         ])
-        // Recent Activities (last 5 transactions)
         setRecentActivities(transactions.slice(0, 5).map(t => ({
           type: t.category,
           title: t.transactionName,
