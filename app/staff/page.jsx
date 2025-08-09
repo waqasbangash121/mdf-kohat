@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getStaff, addStaff, editStaff, deleteStaff } from '../../lib/actions'
+import { addStaff, editStaff, deleteStaff } from '../../lib/actions'
 import { toast } from 'react-toastify'
 import DashboardLayout from '../../components/DashboardLayout'
 import { 
@@ -47,7 +47,8 @@ export default function StaffManagement() {
     async function loadStaff() {
       setLoading(true)
       try {
-        const staff = await getStaff()
+        const res = await fetch('/api/staff')
+        const staff = await res.json()
         setStaffData(staff)
       } catch (error) {
         console.error('Error loading staff:', error)
@@ -368,11 +369,11 @@ export default function StaffManagement() {
                 <span className="font-medium text-xs sm:text-sm truncate max-w-24 sm:max-w-none">{staff.cnic || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Salary:</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Salary:</span>
                 <span className="font-medium text-xs sm:text-sm truncate max-w-20 sm:max-w-none">{staff.salary || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Contact:</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Contact:</span>
                 <span className="font-medium text-xs sm:text-sm truncate max-w-24 sm:max-w-none">{staff.phone || 'N/A'}</span>
               </div>
             </div>
@@ -753,4 +754,4 @@ export default function StaffManagement() {
       </div>
     </DashboardLayout>
   )
-} 
+}

@@ -4,7 +4,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { formatPKR, formatPKRCompact, formatPakistaniNumber } from '../../utils/currency';
-import { getCattle, getStaff, getTransactions, addTransaction } from '../../lib/actions';
+import { addTransaction } from '../../lib/actions';
 
 export default function CashFlow() {
   // ...existing code...
@@ -44,10 +44,15 @@ export default function CashFlow() {
     async function loadData() {
       try {
         setLoading(true)
+        const [cattleRes, staffRes, transactionRes] = await Promise.all([
+          fetch('/api/cattle'),
+          fetch('/api/staff'),
+          fetch('/api/transaction')
+        ])
         const [cattle, staff, transactionData] = await Promise.all([
-          getCattle(),
-          getStaff(),
-          getTransactions()
+          cattleRes.json(),
+          staffRes.json(),
+          transactionRes.json()
         ])
         setCattleData(cattle)
         setStaffMembers(staff)
