@@ -187,7 +187,7 @@ export default function MilkProduction() {
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 group-hover:text-gray-700">Today's Production</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 group-hover:text-gray-700">Today&apos;s Production</p>
                 <p className="text-lg sm:text-xl font-bold text-blue-700">{todaysProduction} L</p>
               </div>
               <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
