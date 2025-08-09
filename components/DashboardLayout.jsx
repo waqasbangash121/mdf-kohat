@@ -2,26 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { 
-  Circle, 
-  Milk, 
-  Users, 
-  BarChart, 
-  Sparkles,
-  DollarSign
-} from 'lucide-react'
+// import { Cow } from 'lucide-react'; // Commenting out Cow import
+import { Circle, Milk, Users, BarChart, DollarSign } from 'lucide-react';
 
 export default function DashboardLayout({ children, title }) {
   const router = useRouter()
   const pathname = usePathname()
-  
-  // Determine active tab based on current pathname
-  const getActiveTab = () => {
-    if (pathname === '/') return 'dashboard'
-    return pathname.slice(1) // Remove leading slash
-  }
-  
-  const activeTab = getActiveTab()
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart, color: 'text-blue-600', path: '/' },
@@ -31,29 +17,26 @@ export default function DashboardLayout({ children, title }) {
     { id: 'cashflow', label: 'Cash', icon: DollarSign, color: 'text-emerald-600', path: '/cashflow' },
   ]
 
+
+  // Determine active tab based on current pathname
+  const getActiveTab = () => {
+    if (pathname === '/') return 'dashboard'
+    return pathname.slice(1) // Remove leading slash
+  }
+  const activeTab = getActiveTab()
+
   const handleNavigation = (item) => {
     router.push(item.path)
   }
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-4 sticky top-0 z-30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">Dairy Farm</h1>
-              <p className="text-sm text-gray-500">Management System</p>
-            </div>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800">
-              {menuItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
-            </h2>
-          </div>
+        <div className="flex items-center justify-center">
+          <Milk className="w-10 h-10 text-emerald-600 mr-3" />
+          <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Mela Dairy Farm</span>
         </div>
       </header>
 

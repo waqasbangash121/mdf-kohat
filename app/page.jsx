@@ -51,15 +51,17 @@ export default function Dashboard() {
     async function loadDashboardData() {
       setLoading(true)
       try {
-        const [cattleRes, staffRes, transactionsRes] = await Promise.all([
+        const [cattleRes, staffRes, transactionsRes, milkRes] = await Promise.all([
           fetch('/api/cattle'),
           fetch('/api/staff'),
-          fetch('/api/transaction')
+          fetch('/api/transaction'),
+          fetch('/api/milk')
         ])
-        const [cattle, staff, transactions] = await Promise.all([
+        const [cattle, staff, transactions, milkProductions] = await Promise.all([
           cattleRes.json(),
           staffRes.json(),
-          transactionsRes.json()
+          transactionsRes.json(),
+          milkRes.json()
         ])
         setStats([
           {
@@ -72,7 +74,7 @@ export default function Dashboard() {
           },
           {
             title: 'Milk Production',
-            value: transactions.filter(t => t.category === 'milk').reduce((sum, t) => sum + (t.litres || 0), 0) + 'L',
+            value: milkProductions.reduce((sum, m) => sum + (m.litres || 0), 0) + 'L',
             change: '+0%',
             icon: Milk,
             gradient: 'from-green-500 to-green-600',
@@ -85,14 +87,6 @@ export default function Dashboard() {
             icon: Users,
             gradient: 'from-purple-500 to-purple-600',
             bgGradient: 'from-purple-50 to-purple-100'
-          },
-          {
-            title: 'Health Alerts',
-            value: 0, // Placeholder, update when health records are connected
-            change: '0',
-            icon: Activity,
-            gradient: 'from-red-500 to-red-600',
-            bgGradient: 'from-red-50 to-red-100'
           }
         ])
         setRecentActivities(transactions.slice(0, 5).map(t => ({
@@ -127,20 +121,7 @@ export default function Dashboard() {
                 <p className="text-xs sm:text-sm text-gray-500 mt-1">Welcome back! Here&apos;s what&apos;s happening on your farm today.</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="relative flex-1 sm:flex-none">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search anything..."
-                  className="pl-10 pr-4 py-2 sm:py-2.5 w-full sm:w-80 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                />
-              </div>
-              <button className="relative p-2 sm:p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200">
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse"></span>
-              </button>
-            </div>
+            {/* Removed search bar and notification bell from dashboard header */}
           </div>
         </header>
 
@@ -149,29 +130,29 @@ export default function Dashboard() {
           <div className="space-y-6 sm:space-y-8">
             <div className="space-y-6 sm:space-y-8">
               {/* Enhanced Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 justify-center items-center mx-auto w-full max-w-3xl">
                 {stats.map((stat, index) => {
                   const Icon = stat.icon
                   return (
-                    <div 
-                      key={index} 
-                      className="group relative bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden"
+                    <div
+                      key={index}
+                      className="group relative bg-white p-5 sm:p-7 rounded-3xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden"
                     >
-                      <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-20 group-hover:opacity-40 transition-opacity duration-300 rounded-3xl`}></div>
                       <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <div className="flex items-center justify-between mb-4">
                           <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-600 group-hover:text-gray-700">{stat.title}</p>
-                            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{stat.value}</p>
+                            <p className="text-sm sm:text-base font-semibold text-gray-700 group-hover:text-gray-900">{stat.title}</p>
+                            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">{stat.value}</p>
                           </div>
-                          <div className={`p-2 sm:p-3 bg-gradient-to-r ${stat.gradient} rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          <div className={`p-3 sm:p-4 bg-gradient-to-r ${stat.gradient} rounded-2xl shadow-xl group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                           </div>
                         </div>
-                        <div className="flex items-center">
-                          <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 mr-1" />
-                          <span className="text-xs sm:text-sm text-green-600 font-medium">{stat.change}</span>
-                          <span className="text-xs sm:text-sm text-gray-500 ml-1 hidden sm:inline">from last month</span>
+                        <div className="flex items-center mt-2">
+                          <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mr-2" />
+                          <span className="text-sm sm:text-base text-green-600 font-semibold">{stat.change}</span>
+                          <span className="text-sm sm:text-base text-gray-500 ml-2 hidden sm:inline">from last month</span>
                         </div>
                       </div>
                     </div>
@@ -179,66 +160,7 @@ export default function Dashboard() {
                 })}
               </div>
 
-              {/* Enhanced Quick Actions */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 sm:mb-6 flex items-center">
-                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500" />
-                    Quick Actions
-                  </h3>
-                  <div className="space-y-3 sm:space-y-4">
-                    {quickActions.map((action, index) => {
-                      const Icon = action.icon
-                      return (
-                        <button 
-                          key={index}
-                          className="w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 transform hover:scale-[1.02] group"
-                        >
-                          <div className="flex items-center">
-                            <div className={`p-2 bg-gradient-to-r ${action.gradient} rounded-lg mr-3 sm:mr-4 group-hover:scale-110 transition-transform duration-200`}>
-                              <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-800 group-hover:text-gray-900 text-sm sm:text-base truncate">{action.title}</p>
-                              <p className="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">{action.description}</p>
-                            </div>
-                            <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Enhanced Recent Activity */}
-                <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 sm:mb-6 flex items-center">
-                    <Activity className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500" />
-                    Recent Activity
-                  </h3>
-                  <div className="space-y-3 sm:space-y-4">
-                    {recentActivities.map((activity, index) => {
-                      const Icon = activity.icon
-                      return (
-                        <div key={index} className="flex items-center p-3 sm:p-4 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-gray-100 transition-colors duration-200 group cursor-pointer">
-                          <div className={`p-2 rounded-lg mr-3 sm:mr-4 ${
-                            activity.color === 'blue' ? 'bg-blue-100 text-blue-600' :
-                            activity.color === 'green' ? 'bg-green-100 text-green-600' :
-                            'bg-red-100 text-red-600'
-                          } group-hover:scale-110 transition-transform duration-200`}>
-                            <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-800 group-hover:text-gray-900 text-sm sm:text-base truncate">{activity.title}</p>
-                            <p className="text-xs sm:text-sm text-gray-600 line-clamp-1">{activity.description}</p>
-                          </div>
-                          <span className="text-xs text-gray-500 group-hover:text-gray-600 flex-shrink-0">{activity.time}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
+              {/* Removed Quick Actions and Recent Activity sections */}
 
               {/* New Analytics Section */}
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-white">
