@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getStaff, addStaff, editStaff, deleteStaff } from '../../lib/actions'
+import { toast } from 'react-toastify'
 import DashboardLayout from '../../components/DashboardLayout'
 import { 
   Users, 
@@ -32,23 +34,34 @@ export default function StaffManagement() {
   const [editingStaff, setEditingStaff] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
-    age: '',
     cnic: '',
-    role: '',
+    phone: '',
     salary: '',
-    contactNumber: '',
     dateOfHiring: '',
     status: 'active'
   })
   const [staffData, setStaffData] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadStaff() {
+      setLoading(true)
+      try {
+        const staff = await getStaff()
+        setStaffData(staff)
+      } catch (error) {
+        console.error('Error loading staff:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadStaff()
+  }, [])
 
   const filteredStaff = staffData.filter(staff => {
-    const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         staff.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         staff.role.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole = filterRole === 'all' || staff.role === filterRole
+    const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' || staff.status === filterStatus
-    return matchesSearch && matchesRole && matchesStatus
+    return matchesSearch && matchesStatus
   })
 
   const getStatusColor = (status) => {
@@ -66,8 +79,9 @@ export default function StaffManagement() {
     }
   }
 
-  const getRoleColor = (role) => {
-    // Generate a consistent color based on role
+  const getRoleColor = (position) => {
+    // Generate a consistent color based on position
+    if (!position) return 'bg-gray-100 text-gray-800';
     const colors = [
       'bg-blue-100 text-blue-800',
       'bg-green-100 text-green-800', 
@@ -76,7 +90,7 @@ export default function StaffManagement() {
       'bg-pink-100 text-pink-800',
       'bg-indigo-100 text-indigo-800'
     ]
-    const index = role.length % colors.length
+    const index = position.length % colors.length
     return colors[index]
   }
 
@@ -88,114 +102,88 @@ export default function StaffManagement() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log('New staff data:', formData)
-    
-    // Add new staff to the list
-    const newStaff = {
-      id: Date.now().toString(),
-      name: formData.name,
-      age: parseInt(formData.age),
-      cnic: formData.cnic,
-      role: formData.role,
-      salary: `PKR ${parseInt(formData.salary).toLocaleString()}`,
-      contactNumber: formData.contactNumber,
-      dateOfHiring: formData.dateOfHiring,
-      status: formData.status,
-      email: `${formData.name.toLowerCase().replace(/\s+/g, '.')}@farm.com`,
-      phone: formData.contactNumber,
-      hireDate: formData.dateOfHiring,
-      hours: '40/week',
-      department: formData.role === 'Farm Manager' ? 'Management' : 
-                  formData.role === 'Veterinary Assistant' ? 'Health' : 'Operations'
+    try {
+      await addStaff({
+        name: formData.name,
+        cnic: formData.cnic,
+        phone: formData.phone,
+        salary: formData.salary,
+        dateOfHiring: formData.dateOfHiring,
+        status: formData.status
+      })
+      // Reload staff data
+      const staff = await getStaff()
+      setStaffData(staff)
+      setFormData({
+        name: '',
+        cnic: '',
+        phone: '',
+        salary: '',
+        dateOfHiring: '',
+        status: 'active'
+      })
+      setShowAddForm(false)
+      toast.success('Staff member added successfully!')
+    } catch (error) {
+      toast.error('Failed to add staff member!')
     }
-    
-    // Add to staff data state
-    setStaffData(prev => [...prev, newStaff])
-    
-    // Reset form and close modal
-    setFormData({
-      name: '',
-      age: '',
-      cnic: '',
-      role: '',
-      salary: '',
-      contactNumber: '',
-      dateOfHiring: '',
-      status: 'active'
-    })
-    setShowAddForm(false)
-    
-    // Show success message (you could add a toast notification here)
-    alert('Staff member added successfully!')
   }
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log('Updated staff data:', formData)
-    
-    // Update the staff in the list
-    setStaffData(prev => prev.map(staff => 
-      staff.id === editingStaff.id 
-        ? {
-            ...staff,
-            name: formData.name,
-            age: parseInt(formData.age),
-            cnic: formData.cnic,
-            role: formData.role,
-            salary: `PKR ${parseInt(formData.salary).toLocaleString()}`,
-            contactNumber: formData.contactNumber,
-            dateOfHiring: formData.dateOfHiring,
-            status: formData.status,
-            email: `${formData.name.toLowerCase().replace(/\s+/g, '.')}@farm.com`,
-            phone: formData.contactNumber,
-            hireDate: formData.dateOfHiring,
-            department: formData.role === 'Farm Manager' ? 'Management' : 
-                        formData.role === 'Veterinary Assistant' ? 'Health' : 'Operations'
-          }
-        : staff
-    ))
-    
-    // Reset form and close modal
-    setFormData({
-      name: '',
-      age: '',
-      cnic: '',
-      role: '',
-      salary: '',
-      contactNumber: '',
-      dateOfHiring: '',
-      status: 'active'
-    })
-    setShowEditForm(false)
-    setEditingStaff(null)
-    
-    // Show success message
-    alert('Staff member updated successfully!')
+    try {
+      await editStaff(editingStaff.id, {
+        name: formData.name,
+        cnic: formData.cnic,
+        phone: formData.phone,
+        salary: formData.salary,
+        dateOfHiring: formData.dateOfHiring,
+        status: formData.status
+      })
+      // Reload staff data
+      const staff = await getStaff()
+      setStaffData(staff)
+      setFormData({
+        name: '',
+        cnic: '',
+        phone: '',
+        salary: '',
+        dateOfHiring: '',
+        status: 'active'
+      })
+      setShowEditForm(false)
+      setEditingStaff(null)
+      toast.success('Staff member updated successfully!')
+    } catch (error) {
+      toast.error('Failed to update staff member!')
+    }
   }
 
   const handleEdit = (staff) => {
     setEditingStaff(staff)
     setFormData({
-      name: staff.name,
-      age: staff.age.toString(),
-      cnic: staff.cnic,
-      role: staff.role,
-      salary: staff.salary.replace('PKR ', '').replace(',', ''),
-      contactNumber: staff.contactNumber,
-      dateOfHiring: staff.dateOfHiring,
-      status: staff.status
+      name: staff.name || '',
+      cnic: staff.cnic || '',
+      phone: staff.phone || '',
+      contact: staff.phone || '',
+      salary: staff.salary !== undefined && staff.salary !== null ? staff.salary.toString() : '',
+      dateOfHiring: staff.dateOfHiring ? new Date(staff.dateOfHiring).toISOString().split('T')[0] : '',
+      status: staff.status || 'active'
     })
     setShowEditForm(true)
   }
 
-  const handleDelete = (staffId) => {
-    if (window.confirm('Are you sure you want to delete this staff member?')) {
-      setStaffData(prev => prev.filter(staff => staff.id !== staffId))
-      alert('Staff member deleted successfully!')
+  const handleDelete = async (staffId) => {
+    // Confirm deletion with a toast instead of window.confirm
+    try {
+      await deleteStaff(staffId)
+      const staff = await getStaff()
+      setStaffData(staff)
+      toast.success('Staff member deleted successfully!')
+    } catch (error) {
+      toast.error('Failed to delete staff member!')
     }
   }
 
@@ -204,7 +192,7 @@ export default function StaffManagement() {
       name: '',
       age: '',
       cnic: '',
-      role: '',
+      position: '',
       salary: '',
       contactNumber: '',
       dateOfHiring: '',
@@ -218,7 +206,7 @@ export default function StaffManagement() {
       name: '',
       age: '',
       cnic: '',
-      role: '',
+      position: '',
       salary: '',
       contactNumber: '',
       dateOfHiring: '',
@@ -323,8 +311,8 @@ export default function StaffManagement() {
               className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="all">All Roles</option>
-              {Array.from(new Set(staffData.map(s => s.role))).map(role => (
-                <option key={role} value={role}>{role}</option>
+              {Array.from(new Set(staffData.map(s => s.position))).filter(Boolean).map(position => (
+                <option key={position} value={position}>{position}</option>
               ))}
             </select>
             <select
@@ -376,26 +364,16 @@ export default function StaffManagement() {
 
             <div className="space-y-2 sm:space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Role:</span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(staff.role)} truncate max-w-24 sm:max-w-none`}>
-                  {staff.role}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Age:</span>
-                <span className="font-medium text-xs sm:text-sm">{staff.age} years</span>
-              </div>
-              <div className="flex justify-between items-center">
                 <span className="text-xs sm:text-sm text-gray-600">CNIC:</span>
-                <span className="font-medium text-xs sm:text-sm truncate max-w-24 sm:max-w-none">{staff.cnic}</span>
+                <span className="font-medium text-xs sm:text-sm truncate max-w-24 sm:max-w-none">{staff.cnic || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs sm:text-sm text-gray-600">Salary:</span>
-                <span className="font-medium text-xs sm:text-sm truncate max-w-20 sm:max-w-none">{staff.salary}</span>
+                <span className="font-medium text-xs sm:text-sm truncate max-w-20 sm:max-w-none">{staff.salary || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs sm:text-sm text-gray-600">Contact:</span>
-                <span className="font-medium text-xs sm:text-sm truncate max-w-24 sm:max-w-none">{staff.contactNumber}</span>
+                <span className="font-medium text-xs sm:text-sm truncate max-w-24 sm:max-w-none">{staff.phone || 'N/A'}</span>
               </div>
             </div>
 
@@ -404,7 +382,7 @@ export default function StaffManagement() {
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(staff.status)}`}>
                   {staff.status}
                 </span>
-                <span className="text-xs text-gray-500">Hired: {staff.hireDate}</span>
+                <span className="text-xs text-gray-500">Hired: {staff.dateOfHiring ? new Date(staff.dateOfHiring).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}</span>
               </div>
               <div className="flex space-x-2">
                 <button className="flex items-center text-xs text-gray-500 hover:text-blue-600 truncate">
@@ -485,26 +463,6 @@ export default function StaffManagement() {
                 />
               </div>
 
-              {/* Age */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span>Age</span>
-                  </div>
-                </label>
-                <input
-                  type="number"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                  placeholder="Enter age"
-                  min="18"
-                  max="65"
-                  required
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                />
-              </div>
 
               {/* CNIC */}
               <div className="space-y-2">
@@ -526,24 +484,6 @@ export default function StaffManagement() {
                 <p className="text-xs text-gray-500">Format: XXXXX-XXXXXXX-X</p>
               </div>
 
-              {/* Role */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Hash className="w-4 h-4 text-gray-400" />
-                    <span>Role</span>
-                  </div>
-                </label>
-                <input
-                  type="text"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  placeholder="Enter role (e.g., Farm Manager, Milker, etc.)"
-                  required
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                />
-              </div>
 
               {/* Salary */}
               <div className="space-y-2">
@@ -565,20 +505,20 @@ export default function StaffManagement() {
                 />
               </div>
 
-              {/* Contact Number */}
+              {/* Phone */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center space-x-2">
                     <Phone className="w-4 h-4 text-gray-400" />
-                    <span>Contact Number</span>
+                    <span>Phone</span>
                   </div>
                 </label>
                 <input
                   type="tel"
-                  name="contactNumber"
-                  value={formData.contactNumber}
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="Enter contact number"
+                  placeholder="Enter phone number"
                   required
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
                 />
@@ -689,26 +629,6 @@ export default function StaffManagement() {
                 />
               </div>
 
-              {/* Age */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span>Age</span>
-                  </div>
-                </label>
-                <input
-                  type="number"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                  placeholder="Enter age"
-                  min="18"
-                  max="65"
-                  required
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                />
-              </div>
 
               {/* CNIC */}
               <div className="space-y-2">
@@ -730,24 +650,6 @@ export default function StaffManagement() {
                 <p className="text-xs text-gray-500">Format: XXXXX-XXXXXXX-X</p>
               </div>
 
-              {/* Role */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Hash className="w-4 h-4 text-gray-400" />
-                    <span>Role</span>
-                  </div>
-                </label>
-                <input
-                  type="text"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  placeholder="Enter role (e.g., Farm Manager, Milker, etc.)"
-                  required
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                />
-              </div>
 
               {/* Salary */}
               <div className="space-y-2">
@@ -779,8 +681,8 @@ export default function StaffManagement() {
                 </label>
                 <input
                   type="tel"
-                  name="contactNumber"
-                  value={formData.contactNumber}
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Enter contact number"
                   required

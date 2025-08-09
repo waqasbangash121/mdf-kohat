@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getCattle, editCattle } from '../../lib/actions'
+import { toast } from 'react-toastify'
 import DashboardLayout from '../../components/DashboardLayout'
 import { 
   Circle, 
@@ -23,8 +25,34 @@ import {
 } from 'lucide-react'
 
 export default function CattleManagement() {
+  const [showAddForm, setShowAddForm] = useState(false)
+  // Add Cattle
+  const handleAddCattle = async (e) => {
+    e.preventDefault()
+    try {
+      // Convert price and age to numbers, date to Date
+      const cattleDataToSave = {
+        name: formData.name,
+        type: formData.type,
+        price: formData.price ? parseInt(formData.price) : 0,
+        age: formData.age ? parseInt(formData.age) : 0,
+        date: formData.dateAdded ? new Date(formData.dateAdded).toISOString() : new Date().toISOString()
+      }
+      await import('../../lib/actions').then(({ addCattle }) =>
+        addCattle(cattleDataToSave)
+      )
+      // Reload cattle data
+      const cattle = await import('../../lib/actions').then(({ getCattle }) => getCattle())
+      setCattleData(cattle)
+      setFormData({ name: '', type: '', price: '', age: '', dateAdded: '' })
+      setShowAddForm(false)
+  toast.success('Cattle added successfully!')
+    } catch (error) {
+  toast.error('Failed to add cattle!')
+    }
+  }
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
+  // Removed status filter (not in schema)
   const [viewMode, setViewMode] = useState('grid') // grid or list
   const [showEditForm, setShowEditForm] = useState(false)
   const [editingCattle, setEditingCattle] = useState(null)
@@ -36,39 +64,29 @@ export default function CattleManagement() {
     dateAdded: ''
   })
 
-  const [cattleData, setCattleData] = useState([
-    {
-      id: '1234',
-      name: 'Bessie',
-      type: 'Jersey',
-      age: 4,
-      price: 150000,
-      dateAdded: '2024-01-15'
-    },
-    {
-      id: '1235',
-      name: 'Daisy',
-      type: 'Holstein',
-      age: 6,
-      price: 180000,
-      dateAdded: '2024-01-14'
-    },
-    {
-      id: '1236',
-      name: 'Molly',
-      type: 'Guernsey',
-      age: 3,
-      price: 120000,
-      dateAdded: '2024-01-13'
+  const [cattleData, setCattleData] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadCattle() {
+      setLoading(true)
+      try {
+        const cattle = await getCattle()
+        setCattleData(cattle)
+      } catch (error) {
+        console.error('Error loading cattle:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ])
+    loadCattle()
+  }, [])
 
   const filteredCattle = cattleData.filter(cattle => {
     const matchesSearch = cattle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          cattle.id.includes(searchTerm) ||
                          cattle.type.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filterStatus === 'all' || cattle.status === filterStatus
-    return matchesSearch && matchesFilter
+    return matchesSearch
   })
 
   const handleInputChange = (e) => {
@@ -79,35 +97,26 @@ export default function CattleManagement() {
     }))
   }
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log('Updated cattle data:', formData)
-    
-    // Update the cattle in the list
-    setCattleData(prev => prev.map(cattle => 
-      cattle.id === editingCattle.id 
-        ? {
-            ...cattle,
-            name: formData.name,
-            type: formData.type,
-            age: parseInt(formData.age),
-            price: parseInt(formData.price),
-            dateAdded: formData.dateAdded
-          }
-        : cattle
-    ))
-    
-    // Reset form and close modal
-    setFormData({
-      name: '',
-      type: '',
-      price: '',
-      age: '',
-      dateAdded: ''
-    })
-    setShowEditForm(false)
-    setEditingCattle(null)
+    try {
+      const cattleDataToUpdate = {
+        name: formData.name,
+        type: formData.type,
+        age: formData.age ? parseInt(formData.age) : 0,
+        price: formData.price ? parseInt(formData.price) : 0,
+        date: formData.dateAdded ? new Date(formData.dateAdded).toISOString() : new Date().toISOString()
+      }
+      await editCattle(editingCattle.id, cattleDataToUpdate)
+      const cattle = await getCattle()
+      setCattleData(cattle)
+      setFormData({ name: '', type: '', price: '', age: '', dateAdded: '' })
+      setShowEditForm(false)
+      setEditingCattle(null)
+      toast.success('Cattle updated successfully!')
+    } catch (error) {
+      toast.error('Failed to update cattle!')
+    }
   }
 
   const handleCloseEditForm = () => {
@@ -124,13 +133,13 @@ export default function CattleManagement() {
 
   const handleEditCattle = (cattle) => {
     setEditingCattle(cattle)
-    setFormData({
-      name: cattle.name,
-      type: cattle.type,
-      price: cattle.price ? cattle.price.toString() : '',
-      age: cattle.age ? cattle.age.toString() : '',
-      dateAdded: cattle.dateAdded || ''
-    })
+      setFormData({
+        name: cattle.name,
+        type: cattle.type,
+        price: cattle.price ? cattle.price.toString() : '',
+        age: cattle.age ? cattle.age.toString() : '',
+  dateAdded: cattle.date ? new Date(cattle.date).toISOString().slice(0,10) : ''
+      })
     setShowEditForm(true)
   }
 
@@ -148,6 +157,15 @@ export default function CattleManagement() {
     <DashboardLayout>
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
       {/* Enhanced Header - Mobile Responsive */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+        >
+          <User className="w-4 h-4 mr-2" />
+          Add Cattle
+        </button>
+      </div>
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Cattle Management</h1>
@@ -255,7 +273,7 @@ export default function CattleManagement() {
                 </div>
                 <div className="bg-gray-50 p-2 sm:p-3 rounded-xl">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Date Added</p>
-                  <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-1">{formatDate(cattle.dateAdded)}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-1">{formatDate(cattle.date)}</p>
                 </div>
               </div>
             </div>
@@ -264,6 +282,117 @@ export default function CattleManagement() {
       </div>
 
       {/* Enhanced Empty State - Mobile Responsive */}
+      {/* Add Cattle Modal */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
+                  <User className="w-4 h-4 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800">Add New Cattle</h3>
+                  <p className="text-xs text-gray-500">Enter the details for your new cattle</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {/* Modal Body */}
+            <form onSubmit={handleAddCattle} className="p-4 space-y-4">
+              {/* Cattle Name */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Cattle Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter cattle name"
+                  required
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+              {/* Cattle Type */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Cattle Type</label>
+                <input
+                  type="text"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleInputChange}
+                  placeholder="Enter cattle type (e.g., Jersey, Holstein)"
+                  required
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+              {/* Price */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Price (PKR)</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  placeholder="Enter price"
+                  min="0"
+                  required
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+              {/* Age */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Age (years)</label>
+                <input
+                  type="number"
+                  name="age"
+                  value={formData.age}
+                  onChange={handleInputChange}
+                  placeholder="Enter age in years"
+                  min="0"
+                  max="20"
+                  required
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+              {/* Date Added */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Date Added</label>
+                <input
+                  type="date"
+                  name="dateAdded"
+                  value={formData.dateAdded}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+              {/* Form Actions */}
+              <div className="flex space-x-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="flex-1 px-3 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg font-medium text-sm"
+                >
+                  Add Cattle
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {filteredCattle.length === 0 && (
         <div className="text-center py-8 sm:py-16 px-4">
           <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">

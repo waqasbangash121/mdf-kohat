@@ -1,0 +1,95 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Cattle {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  age       Int
+  price     Int
+  date      DateTime
+
+  // Relations
+  transactions Transaction[]
+  milkProductions MilkProduction[]
+}
+
+model MilkProduction {
+  id            String   @id @default(cuid())
+  date          DateTime
+  session       Session
+  litres        Int
+  pricePerLitre Int
+
+  // Relations
+  transactions Transaction[]
+  cattleId      String?
+  cattle        Cattle?   @relation(fields: [cattleId], references: [id])
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  name          String
+  type          TransactionType
+  incomeType    IncomeType?
+  expenseType   ExpenseType?
+  amount        Int
+  date          DateTime
+
+  // Relations
+  cattleId      String?
+  cattle        Cattle?   @relation(fields: [cattleId], references: [id])
+  milkProductionId String?
+  milkProduction   MilkProduction? @relation(fields: [milkProductionId], references: [id])
+  staffId       String?
+  staff         Staff?   @relation(fields: [staffId], references: [id])
+}
+
+model Staff {
+  id           String   @id @default(cuid())
+  name         String
+  cnic         String
+  phone        String
+  salary       Int
+  dateOfHiring DateTime
+  status       StaffStatus
+
+  // Relations
+  transactions Transaction[]
+}
+
+enum TransactionType {
+  income
+  expense
+}
+
+enum IncomeType {
+  SellCattle
+  SellMilk
+  Other
+}
+
+enum ExpenseType {
+  BuyCattle
+  CattleFood
+  StaffSalary
+  FuelExpense
+  OtherExpense
+}
+
+enum Session {
+  morning
+  evening
+}
+
+enum StaffStatus {
+  active
+  terminated
+}

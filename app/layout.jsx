@@ -1,6 +1,8 @@
 import { Inter } from 'next/font/google'
 import './globals.css'
-import ErrorBoundary from '../components/ErrorBoundary'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import ErrorBoundary from '../components/ErrorBoundary.js';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,6 +18,7 @@ export default function RootLayout({ children }) {
         <ErrorBoundary>
           <div className="min-h-screen bg-gray-50">
             {children}
+             <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnHover />
           </div>
         </ErrorBoundary>
       </body>

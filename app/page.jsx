@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getCattle, getStaff, getTransactions } from '../lib/actions'
 import DashboardLayout from '../components/DashboardLayout'
 import { 
   Circle, 
@@ -17,41 +18,11 @@ import {
 
 export default function Dashboard() {
 
-  const stats = [
-    { 
-      title: 'Total Cattle', 
-      value: '156', 
-      change: '+12%', 
-      icon: Circle, 
-      gradient: 'from-blue-500 to-blue-600',
-      bgGradient: 'from-blue-50 to-blue-100'
-    },
-    { 
-      title: 'Milk Production', 
-      value: '2,450L', 
-      change: '+8%', 
-      icon: Milk,
-      gradient: 'from-green-500 to-green-600',
-      bgGradient: 'from-green-50 to-green-100'
-    },
-    { 
-      title: 'Active Staff', 
-      value: '8', 
-      change: '+2', 
-      icon: Users,
-      gradient: 'from-purple-500 to-purple-600',
-      bgGradient: 'from-purple-50 to-purple-100'
-    },
-    { 
-      title: 'Health Alerts', 
-      value: '3', 
-      change: '-1', 
-      icon: Activity,
-      gradient: 'from-red-500 to-red-600',
-      bgGradient: 'from-red-50 to-red-100'
-    },
-  ]
+  const [stats, setStats] = useState([])
+  const [recentActivities, setRecentActivities] = useState([])
+  const [loading, setLoading] = useState(true)
 
+  // Quick actions are static, not database-driven
   const quickActions = [
     { 
       title: 'Add New Cattle', 
@@ -62,7 +33,7 @@ export default function Dashboard() {
     },
     { 
       title: 'Record Milk Production', 
-      description: 'Log today&apos;s milk production data',
+      description: "Log today's milk production data",
       icon: Milk, 
       color: 'green',
       gradient: 'from-green-500 to-green-600'
@@ -76,32 +47,67 @@ export default function Dashboard() {
     }
   ]
 
-  const recentActivities = [
-    { 
-      type: 'cattle', 
-      title: 'New cattle added', 
-      description: 'Cow #1234 - Jersey', 
-      time: '2 hours ago',
-      icon: Circle,
-      color: 'blue'
-    },
-    { 
-      type: 'milk', 
-      title: 'Milk production recorded', 
-      description: '2,450L today', 
-      time: '4 hours ago',
-      icon: Milk,
-      color: 'green'
-    },
-    { 
-      type: 'health', 
-      title: 'Health check completed', 
-      description: 'Cow #5678 - All clear', 
-      time: '6 hours ago',
-      icon: Activity,
-      color: 'red'
+  useEffect(() => {
+    async function loadDashboardData() {
+      setLoading(true)
+      try {
+        const [cattle, staff, transactions] = await Promise.all([
+          getCattle(),
+          getStaff(),
+          getTransactions()
+        ])
+        // Stats
+        setStats([
+          {
+            title: 'Total Cattle',
+            value: cattle.length,
+            change: '+0%',
+            icon: Circle,
+            gradient: 'from-blue-500 to-blue-600',
+            bgGradient: 'from-blue-50 to-blue-100'
+          },
+          {
+            title: 'Milk Production',
+            value: transactions.filter(t => t.category === 'milk').reduce((sum, t) => sum + (t.litres || 0), 0) + 'L',
+            change: '+0%',
+            icon: Milk,
+            gradient: 'from-green-500 to-green-600',
+            bgGradient: 'from-green-50 to-green-100'
+          },
+          {
+            title: 'Active Staff',
+            value: staff.length,
+            change: '+0',
+            icon: Users,
+            gradient: 'from-purple-500 to-purple-600',
+            bgGradient: 'from-purple-50 to-purple-100'
+          },
+          {
+            title: 'Health Alerts',
+            value: 0, // Placeholder, update when health records are connected
+            change: '0',
+            icon: Activity,
+            gradient: 'from-red-500 to-red-600',
+            bgGradient: 'from-red-50 to-red-100'
+          }
+        ])
+        // Recent Activities (last 5 transactions)
+        setRecentActivities(transactions.slice(0, 5).map(t => ({
+          type: t.category,
+          title: t.transactionName,
+          description: t.category + (t.litres ? ` - ${t.litres}L` : ''),
+          time: new Date(t.date).toLocaleDateString(),
+          icon: t.category === 'milk' ? Milk : t.category === 'sell cattle' ? Circle : t.category === 'health' ? Activity : Circle,
+          color: t.category === 'milk' ? 'green' : t.category === 'sell cattle' ? 'blue' : t.category === 'health' ? 'red' : 'blue'
+        })))
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+    loadDashboardData()
+  }, [])
 
   return (
     <DashboardLayout>
