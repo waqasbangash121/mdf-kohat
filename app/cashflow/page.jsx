@@ -1,5 +1,5 @@
 "use client";
-import { Home, Truck, Users, ShoppingCart, Circle, Bottle, DollarSign, Target, TrendingUp, TrendingDown, Download, BarChart3, Search, Eye, Edit, Trash2, X, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { Home, Truck, Users, ShoppingCart, Circle, Milk, DollarSign, Target, TrendingUp, TrendingDown, Download, BarChart3, Search, Eye, Edit, Trash2, X, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
@@ -89,7 +89,7 @@ export default function CashFlow() {
       name: 'Milk Sales', 
       amount: 8950000, 
       percentage: 71.2, 
-      icon: Bottle, 
+      icon: Milk, 
       color: 'bg-blue-500',
       transactions: 156
     },
