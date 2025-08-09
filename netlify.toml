@@ -3,6 +3,4 @@
   command = "npm run build"
 
 [[plugins]]
-  package = "@netlify/plugin-prisma"
-  [plugins.inputs]
-    clear_cache = true
+  package = "@netlify/plugin-nextjs"
