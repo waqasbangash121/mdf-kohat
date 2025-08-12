@@ -928,7 +928,7 @@ export default function CashFlow() {
 
         {/* Enhanced Add Transaction Modal */}
         {showAddTransaction && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
             <div className="bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-3xl p-6 sm:p-8 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto shadow-3xl">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center">

@@ -360,72 +360,80 @@ export default function CattleManagement() {
           }
         }
       `}</style>
+      {/* Enhanced Add Cattle Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
-                  <User className="w-4 h-4 text-blue-600" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-3xl p-6 sm:p-8 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto shadow-3xl">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mr-4">
+                  <Circle className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-800">Add New Cattle</h3>
-                  <p className="text-xs text-gray-500">Enter the details for your new cattle</p>
-                </div>
+                <h3 className="text-2xl font-bold text-gray-800">Add New Cattle</h3>
               </div>
-              <button
+              <button 
                 onClick={() => setShowAddForm(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-2xl transition-all duration-200"
               >
-                <X className="w-4 h-4" />
+                <X className="w-6 h-6" />
               </button>
             </div>
-            {/* Modal Body */}
-            <form onSubmit={handleAddCattle} className="p-4 space-y-4">
+
+            <form onSubmit={handleAddCattle} className="space-y-6">
               {/* Cattle Name */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Cattle Name</label>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Cattle Name
+                </label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter cattle name"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
+
               {/* Cattle Type */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Cattle Type</label>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Cattle Type/Breed
+                </label>
                 <input
                   type="text"
                   name="type"
                   value={formData.type}
                   onChange={handleInputChange}
-                  placeholder="Enter cattle type (e.g., Jersey, Holstein)"
+                  placeholder="Enter cattle type (e.g., Jersey, Holstein, Guernsey)"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
+
               {/* Price */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Price (PKR)</label>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Purchase Price (PKR)
+                </label>
                 <input
                   type="number"
                   name="price"
                   value={formData.price}
                   onChange={handleInputChange}
-                  placeholder="Enter price"
+                  placeholder="Enter purchase price in PKR"
                   min="0"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
+
               {/* Age */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Age (years)</label>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Age (years)
+                </label>
                 <input
                   type="number"
                   name="age"
@@ -434,34 +442,38 @@ export default function CattleManagement() {
                   placeholder="Enter age in years"
                   min="0"
                   max="20"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
+
               {/* Date Added */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Date Added</label>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Date Added
+                </label>
                 <input
                   type="date"
                   name="dateAdded"
                   value={formData.dateAdded}
                   onChange={handleInputChange}
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
-              {/* Form Actions */}
-              <div className="flex space-x-3 pt-4 border-t border-gray-100">
+
+              {/* Submit Button */}
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="flex-1 px-3 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium text-sm"
+                  className="flex-1 px-6 py-4 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg font-medium text-sm"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Add Cattle
                 </button>
@@ -485,38 +497,30 @@ export default function CattleManagement() {
         </div>
       )}
 
-      {/* Edit Cattle Modal - Mobile Responsive */}
+      {/* Enhanced Edit Cattle Modal */}
       {showEditForm && editingCattle && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
-                  <Edit className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-3xl p-6 sm:p-8 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto shadow-3xl">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl mr-4">
+                  <Edit className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">Edit Cattle</h3>
-                  <p className="text-xs sm:text-sm text-gray-500">Update the details for {editingCattle.name}</p>
-                </div>
+                <h3 className="text-2xl font-bold text-gray-800">Edit Cattle</h3>
               </div>
-              <button
+              <button 
                 onClick={handleCloseEditForm}
-                className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-2xl transition-all duration-200"
               >
-                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleEditSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <form onSubmit={handleEditSubmit} className="space-y-6">
               {/* Cattle Name */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span>Cattle Name/ID</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Cattle Name/ID
                 </label>
                 <input
                   type="text"
@@ -524,18 +528,15 @@ export default function CattleManagement() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter cattle name or ID number"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
               {/* Cattle Type */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Hash className="w-4 h-4 text-gray-400" />
-                    <span>Cattle Type/Breed</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Cattle Type/Breed
                 </label>
                 <input
                   type="text"
@@ -543,22 +544,19 @@ export default function CattleManagement() {
                   value={formData.type}
                   onChange={handleInputChange}
                   placeholder="Enter cattle type or breed (e.g., Jersey, Holstein)"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
-                <p className="text-xs text-gray-500">Enter the type or breed of the cattle</p>
+                <p className="text-sm text-gray-500 mt-2">Enter the type or breed of the cattle</p>
               </div>
 
               {/* Price */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-gray-400" />
-                    <span>Purchase Price (PKR)</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Purchase Price (PKR)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">₨</span>
+                  <span className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium text-lg">₨</span>
                   <input
                     type="number"
                     name="price"
@@ -567,20 +565,17 @@ export default function CattleManagement() {
                     placeholder="0"
                     min="0"
                     step="1"
+                    className="w-full pl-12 pr-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                     required
-                    className="w-full pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   />
                 </div>
-                <p className="text-xs text-gray-500">Enter the purchase price in Pakistani Rupees (PKR)</p>
+                <p className="text-sm text-gray-500 mt-2">Enter the purchase price in Pakistani Rupees (PKR)</p>
               </div>
 
               {/* Age */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span>Age (years)</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Age (years)
                 </label>
                 <input
                   type="number"
@@ -590,42 +585,39 @@ export default function CattleManagement() {
                   placeholder="Enter age in years"
                   min="0"
                   max="20"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
               {/* Date Added */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span>Date Added</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Date Added
                 </label>
                 <input
                   type="date"
                   name="dateAdded"
                   value={formData.dateAdded}
                   onChange={handleInputChange}
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                 />
-                <p className="text-xs text-gray-500">Select the date when the cattle was added to your farm</p>
+                <p className="text-sm text-gray-500 mt-2">Select the date when the cattle was added to your farm</p>
               </div>
 
-              {/* Form Actions */}
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-100">
+              {/* Submit Button */}
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={handleCloseEditForm}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium text-sm sm:text-base"
+                  className="flex-1 px-6 py-4 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm sm:text-base"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Save Changes
                 </button>

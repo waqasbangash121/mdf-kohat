@@ -115,7 +115,8 @@ export default function StaffManagement() {
         status: formData.status
       })
       // Reload staff data
-      const staff = await getStaff()
+      const res = await fetch('/api/staff')
+      const staff = await res.json()
       setStaffData(staff)
       setFormData({
         name: '',
@@ -144,7 +145,8 @@ export default function StaffManagement() {
         status: formData.status
       })
       // Reload staff data
-      const staff = await getStaff()
+      const res = await fetch('/api/staff')
+      const staff = await res.json()
       setStaffData(staff)
       setFormData({
         name: '',
@@ -180,7 +182,8 @@ export default function StaffManagement() {
     // Confirm deletion with a toast instead of window.confirm
     try {
       await deleteStaff(staffId)
-      const staff = await getStaff()
+      const res = await fetch('/api/staff')
+      const staff = await res.json()
       setStaffData(staff)
       toast.success('Staff member deleted successfully!')
     } catch (error) {
@@ -238,14 +241,7 @@ export default function StaffManagement() {
                   Manage farm employees, roles, and schedules efficiently
                 </p>
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-4">
-                  <div className="flex items-center text-white/90 bg-white/20 rounded-full px-4 py-2">
-                    <Users className="w-5 h-5 mr-2 text-purple-200" />
-                    <span className="font-semibold">{staffData.length} Total Staff</span>
-                  </div>
-                  <div className="flex items-center text-white/90 bg-white/20 rounded-full px-4 py-2">
-                    <UserCheck className="w-5 h-5 mr-2 text-purple-200" />
-                    <span className="font-semibold">{staffData.filter(s => s.status === 'active').length} Active</span>
-                  </div>
+                  
                 </div>
               </div>
               <div className="flex justify-center lg:justify-end">
@@ -575,36 +571,28 @@ export default function StaffManagement() {
 
       {/* Enhanced Add New Staff Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto border border-white/20">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl flex items-center justify-center">
-                  <Plus className="w-6 h-6 text-purple-600" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-3xl p-6 sm:p-8 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto shadow-3xl">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl mr-4">
+                  <Plus className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800">Add New Staff</h3>
-                  <p className="text-sm text-gray-500">Enter the details for your new staff member</p>
-                </div>
+                <h3 className="text-2xl font-bold text-gray-800">Add New Staff</h3>
               </div>
               <button
                 onClick={handleCloseForm}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
+                className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-2xl transition-all duration-200"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Staff Name */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span>Full Name</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Full Name
                 </label>
                 <input
                   type="text"
@@ -612,18 +600,15 @@ export default function StaffManagement() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter full name"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* CNIC */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <CreditCard className="w-4 h-4 text-gray-400" />
-                    <span>CNIC</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  CNIC
                 </label>
                 <input
                   type="text"
@@ -631,19 +616,16 @@ export default function StaffManagement() {
                   value={formData.cnic}
                   onChange={handleInputChange}
                   placeholder="Enter CNIC (e.g., 12345-1234567-1)"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-base"
                 />
-                <p className="text-xs text-gray-500">Format: XXXXX-XXXXXXX-X</p>
+                <p className="text-sm text-gray-500 mt-2">Format: XXXXX-XXXXXXX-X</p>
               </div>
 
               {/* Salary */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-gray-400" />
-                    <span>Salary (PKR)</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Salary (PKR)
                 </label>
                 <input
                   type="number"
@@ -652,18 +634,15 @@ export default function StaffManagement() {
                   onChange={handleInputChange}
                   placeholder="Enter salary amount"
                   min="0"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* Phone */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4 text-gray-400" />
-                    <span>Phone</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Phone Number
                 </label>
                 <input
                   type="tel"
@@ -671,43 +650,37 @@ export default function StaffManagement() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Enter phone number"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* Date of Hiring */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span>Date of Hiring</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Date of Hiring
                 </label>
                 <input
                   type="date"
                   name="dateOfHiring"
                   value={formData.dateOfHiring}
                   onChange={handleInputChange}
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* Status */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <UserCheck className="w-4 h-4 text-gray-400" />
-                    <span>Status</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Status
                 </label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-base"
                 >
                   <option value="active">Active</option>
                   <option value="on-leave">On Leave</option>
@@ -716,18 +689,18 @@ export default function StaffManagement() {
                 </select>
               </div>
 
-              {/* Form Actions */}
-              <div className="flex space-x-4 pt-4 border-t border-gray-100">
+              {/* Submit Button */}
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={handleCloseForm}
-                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 font-semibold text-base transition-all duration-300"
+                  className="flex-1 px-6 py-4 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-3 rounded-2xl hover:from-purple-700 hover:to-indigo-700 shadow-lg font-semibold text-base transition-all duration-300 transform hover:scale-105"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Add Staff
                 </button>
@@ -739,36 +712,28 @@ export default function StaffManagement() {
 
       {/* Enhanced Edit Staff Modal */}
       {showEditForm && editingStaff && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto border border-white/20">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center">
-                  <Edit className="w-6 h-6 text-green-600" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-3xl p-6 sm:p-8 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto shadow-3xl">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mr-4">
+                  <Edit className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800">Edit Staff Member</h3>
-                  <p className="text-sm text-gray-500">Update the details for {editingStaff.name}</p>
-                </div>
+                <h3 className="text-2xl font-bold text-gray-800">Edit Staff Member</h3>
               </div>
               <button
                 onClick={handleCloseEditForm}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
+                className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-2xl transition-all duration-200"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleEditSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleEditSubmit} className="space-y-6">
               {/* Staff Name */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span>Full Name</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Full Name
                 </label>
                 <input
                   type="text"
@@ -776,18 +741,15 @@ export default function StaffManagement() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter full name"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* CNIC */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <CreditCard className="w-4 h-4 text-gray-400" />
-                    <span>CNIC</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  CNIC
                 </label>
                 <input
                   type="text"
@@ -795,19 +757,16 @@ export default function StaffManagement() {
                   value={formData.cnic}
                   onChange={handleInputChange}
                   placeholder="Enter CNIC (e.g., 12345-1234567-1)"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-base"
                 />
-                <p className="text-xs text-gray-500">Format: XXXXX-XXXXXXX-X</p>
+                <p className="text-sm text-gray-500 mt-2">Format: XXXXX-XXXXXXX-X</p>
               </div>
 
               {/* Salary */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-gray-400" />
-                    <span>Salary (PKR)</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Salary (PKR)
                 </label>
                 <input
                   type="number"
@@ -816,18 +775,15 @@ export default function StaffManagement() {
                   onChange={handleInputChange}
                   placeholder="Enter salary amount"
                   min="0"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* Contact Number */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4 text-gray-400" />
-                    <span>Contact Number</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Contact Number
                 </label>
                 <input
                   type="tel"
@@ -835,43 +791,37 @@ export default function StaffManagement() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Enter contact number"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* Date of Hiring */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span>Date of Hiring</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Date of Hiring
                 </label>
                 <input
                   type="date"
                   name="dateOfHiring"
                   value={formData.dateOfHiring}
                   onChange={handleInputChange}
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-base"
                 />
               </div>
 
               {/* Status */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <div className="flex items-center space-x-2">
-                    <UserCheck className="w-4 h-4 text-gray-400" />
-                    <span>Status</span>
-                  </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Status
                 </label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-lg transition-all duration-200"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-base"
                 >
                   <option value="active">Active</option>
                   <option value="on-leave">On Leave</option>
@@ -880,18 +830,18 @@ export default function StaffManagement() {
                 </select>
               </div>
 
-              {/* Form Actions */}
-              <div className="flex space-x-4 pt-4 border-t border-gray-100">
+              {/* Submit Button */}
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={handleCloseEditForm}
-                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-semibold text-base"
+                  className="flex-1 px-6 py-4 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-3 rounded-2xl hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-base transform hover:scale-105"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Update Staff
                 </button>
