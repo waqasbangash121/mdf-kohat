@@ -144,8 +144,11 @@ export default function Dashboard() {
                     key={index}
                     className="group relative bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden"
                     style={{
-                      animationDelay: `${index * 150}ms`,
-                      animation: 'fadeInUp 0.8s ease-out forwards'
+                      animationName: 'fadeInUp',
+                      animationDuration: '0.8s',
+                      animationTimingFunction: 'ease-out',
+                      animationFillMode: 'forwards',
+                      animationDelay: `${index * 150}ms`
                     }}
                   >
                     {/* Animated Background */}

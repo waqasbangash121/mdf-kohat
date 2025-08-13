@@ -8,85 +8,74 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Core entities with simplified relationships
 model Cattle {
-  id        String   @id @default(cuid())
-  name      String
-  type      String
-  age       Int
-  price     Int
-  date      DateTime
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // Bull, Cow, Buffalo, etc.
+  age         Int
+  purchasePrice Int
+  purchaseDate  DateTime
+  status      CattleStatus @default(active)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  // Relations
+  // Relations - cattle can be involved in transactions
   transactions Transaction[]
-  milkProductions MilkProduction[]
-}
 
-model MilkProduction {
-  id            String   @id @default(cuid())
-  date          DateTime
-  session       Session
-  litres        Int
-  pricePerLitre Int
-
-  // Relations
-  transactions Transaction[]
-  cattleId      String?
-  cattle        Cattle?   @relation(fields: [cattleId], references: [id])
-}
-
-model Transaction {
-  id            String   @id @default(cuid())
-  name          String
-  type          TransactionType
-  incomeType    IncomeType?
-  expenseType   ExpenseType?
-  amount        Int
-  date          DateTime
-
-  // Relations
-  cattleId      String?
-  cattle        Cattle?   @relation(fields: [cattleId], references: [id])
-  milkProductionId String?
-  milkProduction   MilkProduction? @relation(fields: [milkProductionId], references: [id])
-  staffId       String?
-  staff         Staff?   @relation(fields: [staffId], references: [id])
+  @@map("cattle")
 }
 
 model Staff {
-  id           String   @id @default(cuid())
+  id           String      @id @default(cuid())
   name         String
-  cnic         String
+  cnic         String      @unique
   phone        String
   salary       Int
   dateOfHiring DateTime
-  status       StaffStatus
+  status       StaffStatus @default(active)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  // Relations
+  // Relations - staff can receive salary payments
   transactions Transaction[]
+
+  @@map("staff")
 }
 
+model Transaction {
+  id          String          @id @default(cuid())
+  name        String          // Description of transaction
+  type        TransactionType // income or expense
+  category    String          // sell_cattle, milk_sales, cattle_food, staff_salary, etc.
+  amount      Int             // Amount in paisa (to avoid decimal issues)
+  date        DateTime
+  
+  // Additional details for specific transaction types
+  details     Json?           // Store flexible data like {litres: 50, pricePerLitre: 100, session: "morning"}
+  
+  // Optional relationships
+  cattleId    String?
+  cattle      Cattle?         @relation(fields: [cattleId], references: [id])
+  staffId     String?
+  staff       Staff?          @relation(fields: [staffId], references: [id])
+  
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("transactions")
+}
+
+// Simplified enums
 enum TransactionType {
   income
   expense
 }
 
-enum IncomeType {
-  SellCattle
-  SellMilk
-  Other
-}
-
-enum ExpenseType {
-  BuyCattle
-  CattleFood
-  StaffSalary
-  FuelExpense
-  OtherExpense
-}
-
-enum Session {
-  morning
-  evening
+enum CattleStatus {
+  active
+  sold
+  deceased
 }
 
 enum StaffStatus {

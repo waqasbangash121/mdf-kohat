@@ -35,9 +35,9 @@ export default function CattleManagement() {
       const cattleDataToSave = {
         name: formData.name,
         type: formData.type,
-        price: formData.price ? parseInt(formData.price) : 0,
+        purchasePrice: formData.price ? parseInt(formData.price) : 0,
         age: formData.age ? parseInt(formData.age) : 0,
-        date: formData.dateAdded ? new Date(formData.dateAdded).toISOString() : new Date().toISOString()
+        purchaseDate: formData.dateAdded ? new Date(formData.dateAdded).toISOString() : new Date().toISOString()
       }
       await import('../../lib/actions').then(({ addCattle }) =>
         addCattle(cattleDataToSave)
@@ -53,6 +53,7 @@ export default function CattleManagement() {
     }
   }
   const [searchTerm, setSearchTerm] = useState('')
+  const [showSoldCattle, setShowSoldCattle] = useState(false)
   // Removed status filter (not in schema)
   const [viewMode, setViewMode] = useState('grid') // grid or list
   const [showEditForm, setShowEditForm] = useState(false)
@@ -83,11 +84,16 @@ export default function CattleManagement() {
     loadCattle()
   }, [])
 
+  // Enhanced filter to exclude sold cattle by default
   const filteredCattle = cattleData.filter(cattle => {
     const matchesSearch = cattle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          cattle.id.includes(searchTerm) ||
                          cattle.type.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch
+    
+    // Filter by status: show only active cattle unless showSoldCattle is true
+    const matchesStatus = showSoldCattle || cattle.status !== 'sold'
+    
+    return matchesSearch && matchesStatus
   })
 
   const handleInputChange = (e) => {
@@ -137,9 +143,9 @@ export default function CattleManagement() {
       setFormData({
         name: cattle.name,
         type: cattle.type,
-        price: cattle.price ? cattle.price.toString() : '',
+        price: cattle.purchasePrice ? cattle.purchasePrice.toString() : '',
         age: cattle.age ? cattle.age.toString() : '',
-  dateAdded: cattle.date ? new Date(cattle.date).toISOString().slice(0,10) : ''
+  dateAdded: cattle.purchaseDate ? new Date(cattle.purchaseDate).toISOString().slice(0,10) : ''
       })
     setShowEditForm(true)
   }
@@ -224,6 +230,17 @@ export default function CattleManagement() {
                     <Filter className="w-5 h-5 mr-2" />
                     Advanced Filters
                   </button>
+                  <button 
+                    onClick={() => setShowSoldCattle(!showSoldCattle)}
+                    className={`px-6 py-3 border rounded-2xl flex items-center justify-center transition-all duration-300 text-base font-medium shadow-sm hover:shadow-md ${
+                      showSoldCattle 
+                        ? 'bg-red-100 border-red-300 text-red-700 hover:bg-red-200' 
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Eye className="w-5 h-5 mr-2" />
+                    {showSoldCattle ? 'Hide Sold' : 'Show Sold'}
+                  </button>
                   <div className="flex border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
                     <button 
                       onClick={() => setViewMode('grid')}
@@ -249,8 +266,11 @@ export default function CattleManagement() {
                   key={cattle.id} 
                   className="group bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden"
                   style={{
-                    animationDelay: `${index * 100}ms`,
-                    animation: 'fadeInUp 0.8s ease-out forwards'
+                    animationName: 'fadeInUp',
+                    animationDuration: '0.8s',
+                    animationTimingFunction: 'ease-out',
+                    animationFillMode: 'forwards',
+                    animationDelay: `${index * 100}ms`
                   }}
                 >
                   {/* Animated Background */}
@@ -302,19 +322,33 @@ export default function CattleManagement() {
                       </div>
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-2xl group-hover:from-green-50 group-hover:to-emerald-50 transition-all duration-300">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Value</p>
-                        <p className="text-sm font-bold text-gray-800">₨{cattle.price.toLocaleString()}</p>
+                        <p className="text-sm font-bold text-gray-800">₨{cattle.purchasePrice?.toLocaleString() || 'N/A'}</p>
                       </div>
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-2xl group-hover:from-green-50 group-hover:to-emerald-50 transition-all duration-300">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Added</p>
-                        <p className="text-sm font-bold text-gray-800">{formatDate(cattle.date)}</p>
+                        <p className="text-sm font-bold text-gray-800">{formatDate(cattle.purchaseDate)}</p>
                       </div>
                     </div>
 
                     {/* Quick Actions */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-xs font-semibold text-green-600">Healthy</span>
+                        <div className={`w-2 h-2 rounded-full ${
+                          cattle.status === 'sold' 
+                            ? 'bg-red-500' 
+                            : cattle.status === 'active' 
+                            ? 'bg-green-500'
+                            : 'bg-gray-500'
+                        }`}></div>
+                        <span className={`text-xs font-semibold ${
+                          cattle.status === 'sold' 
+                            ? 'text-red-600' 
+                            : cattle.status === 'active' 
+                            ? 'text-green-600'
+                            : 'text-gray-600'
+                        }`}>
+                          {cattle.status === 'sold' ? 'Sold' : cattle.status === 'active' ? 'Active' : cattle.status || 'Unknown'}
+                        </span>
                       </div>
                       <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all duration-300" />
                     </div>

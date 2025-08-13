@@ -33,11 +33,7 @@ export default function CashFlow() {
     // Related entities
     cattleId: '',
     staffId: '',
-    description: '',
-    // Cattle-specific fields for purchases
-    cattleName: '',
-    cattleType: '',
-    cattleAge: ''
+    description: ''
   })
 
   // Edit mode state
@@ -101,24 +97,15 @@ export default function CashFlow() {
         // Milk-specific fields
         litres: formData.litres,
         pricePerLitre: formData.pricePerLitre,
-        session: formData.session,
-        // Cattle-specific fields for purchases
-        cattleName: formData.cattleName,
-        cattleType: formData.cattleType,
-        cattleAge: formData.cattleAge
+        session: formData.session
       }
-
-      console.log('Submitting transaction data:', transactionData)
-
-      console.log('Submitting transaction data:', transactionData)
 
       if (editingTransaction) {
         await updateTransaction(editingTransaction.id, transactionData)
         toast.success('Transaction updated successfully!')
         setEditingTransaction(null)
       } else {
-        const result = await addTransaction(transactionData)
-        console.log('Transaction result:', result)
+        await addTransaction(transactionData)
         toast.success('Transaction added successfully!')
       }
 
@@ -134,10 +121,7 @@ export default function CashFlow() {
         session: 'morning',
         cattleId: '',
         staffId: '',
-        description: '',
-        cattleName: '',
-        cattleType: '',
-        cattleAge: ''
+        description: ''
       })
       setShowAddTransaction(false)
       await loadData()
@@ -214,10 +198,7 @@ export default function CashFlow() {
                 session: 'morning',
                 cattleId: '',
                 staffId: '',
-                description: '',
-                cattleName: '',
-                cattleType: '',
-                cattleAge: ''
+                description: ''
               })
             }}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
@@ -377,8 +358,8 @@ export default function CashFlow() {
 
         {/* Add/Edit Transaction Modal */}
         {showAddTransaction && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">
                   {editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}
@@ -507,57 +488,6 @@ export default function CashFlow() {
                   </div>
                 )}
 
-                {/* Cattle Purchase Details */}
-                {formData.category === 'cattle_purchase' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Cattle Name
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.cattleName}
-                        onChange={(e) => handleFormChange('cattleName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter cattle name"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Cattle Type
-                      </label>
-                      <select
-                        value={formData.cattleType}
-                        onChange={(e) => handleFormChange('cattleType', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      >
-                        <option value="">Select Type</option>
-                        <option value="Cow">Cow</option>
-                        <option value="Bull">Bull</option>
-                        <option value="Buffalo">Buffalo</option>
-                        <option value="Calf">Calf</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Age (Years)
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.cattleAge}
-                        onChange={(e) => handleFormChange('cattleAge', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter age in years"
-                        min="0"
-                        max="20"
-                        required
-                      />
-                    </div>
-                  </>
-                )}
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Date
@@ -571,8 +501,8 @@ export default function CashFlow() {
                   />
                 </div>
 
-                {/* Related Cattle - only for sales, not purchases */}
-                {formData.category === 'cattle_sales' && (
+                {/* Related Cattle */}
+                {(formData.category === 'cattle_sales' || formData.category === 'cattle_purchase') && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Related Cattle
@@ -583,7 +513,7 @@ export default function CashFlow() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select Cattle</option>
-                      {cattleData.filter(cattle => cattle.status === 'active').map(cattle => (
+                      {cattleData.map(cattle => (
                         <option key={cattle.id} value={cattle.id}>
                           {cattle.name} ({cattle.type})
                         </option>

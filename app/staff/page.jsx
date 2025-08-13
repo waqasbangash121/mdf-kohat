@@ -267,8 +267,11 @@ export default function StaffManagement() {
               <div 
                 className="group bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden"
                 style={{
-                  animationDelay: '0ms',
-                  animation: 'fadeInUp 0.8s ease-out forwards'
+                  animationName: 'fadeInUp',
+                  animationDuration: '0.8s',
+                  animationTimingFunction: 'ease-out',
+                  animationFillMode: 'forwards',
+                  animationDelay: '0ms'
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-indigo-100 opacity-0 group-hover:opacity-30 transition-all duration-500 rounded-3xl"></div>
@@ -295,8 +298,11 @@ export default function StaffManagement() {
               <div 
                 className="group bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden"
                 style={{
-                  animationDelay: '100ms',
-                  animation: 'fadeInUp 0.8s ease-out forwards'
+                  animationName: 'fadeInUp',
+                  animationDuration: '0.8s',
+                  animationTimingFunction: 'ease-out',
+                  animationFillMode: 'forwards',
+                  animationDelay: '100ms'
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 opacity-0 group-hover:opacity-30 transition-all duration-500 rounded-3xl"></div>
@@ -323,8 +329,11 @@ export default function StaffManagement() {
               <div 
                 className="group bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden"
                 style={{
-                  animationDelay: '200ms',
-                  animation: 'fadeInUp 0.8s ease-out forwards'
+                  animationName: 'fadeInUp',
+                  animationDuration: '0.8s',
+                  animationTimingFunction: 'ease-out',
+                  animationFillMode: 'forwards',
+                  animationDelay: '200ms'
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-50 to-orange-100 opacity-0 group-hover:opacity-30 transition-all duration-500 rounded-3xl"></div>
@@ -351,8 +360,11 @@ export default function StaffManagement() {
               <div 
                 className="group bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden"
                 style={{
-                  animationDelay: '300ms',
-                  animation: 'fadeInUp 0.8s ease-out forwards'
+                  animationName: 'fadeInUp',
+                  animationDuration: '0.8s',
+                  animationTimingFunction: 'ease-out',
+                  animationFillMode: 'forwards',
+                  animationDelay: '300ms'
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-rose-100 opacity-0 group-hover:opacity-30 transition-all duration-500 rounded-3xl"></div>
@@ -426,8 +438,11 @@ export default function StaffManagement() {
                   key={staff.id} 
                   className="group bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer overflow-hidden"
                   style={{
-                    animationDelay: `${index * 100}ms`,
-                    animation: 'fadeInUp 0.8s ease-out forwards'
+                    animationName: 'fadeInUp',
+                    animationDuration: '0.8s',
+                    animationTimingFunction: 'ease-out',
+                    animationFillMode: 'forwards',
+                    animationDelay: `${index * 100}ms`
                   }}
                 >
                   {/* Animated Background */}
