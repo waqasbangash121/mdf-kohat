@@ -12,6 +12,7 @@ export default function CashFlow() {
   const [showAddTransaction, setShowAddTransaction] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
+  const [filterType, setFilterType] = useState('all')
   
   // Database state
   const [cattleData, setCattleData] = useState([])
@@ -56,6 +57,14 @@ export default function CashFlow() {
         getStaff(), 
         getTransactions()
       ])
+      
+      // Debug: Log the transaction order from database
+      console.log('Transactions from DB (first 5):', transactionData.slice(0, 5).map(t => ({
+        name: t.name,
+        date: t.date,
+        createdAt: t.createdAt
+      })))
+      
       setCattleData(cattle)
       setStaffMembers(staff)
       setTransactions(transactionData)
@@ -110,8 +119,6 @@ export default function CashFlow() {
 
       console.log('Submitting transaction data:', transactionData)
 
-      console.log('Submitting transaction data:', transactionData)
-
       if (editingTransaction) {
         await updateTransaction(editingTransaction.id, transactionData)
         toast.success('Transaction updated successfully!')
@@ -140,6 +147,8 @@ export default function CashFlow() {
         cattleAge: ''
       })
       setShowAddTransaction(false)
+      
+      // Force a fresh reload of data to ensure we get the latest transactions
       await loadData()
     } catch (error) {
       console.error('Error submitting transaction:', error)
@@ -180,24 +189,54 @@ export default function CashFlow() {
     }
   }
 
-  // Filter transactions
-  const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = filterCategory === 'all' || transaction.category === filterCategory
-    return matchesSearch && matchesCategory
-  })
+  // Helper function to get relative time
+  const getRelativeTime = (date) => {
+    const now = new Date();
+    const timeDiff = now - new Date(date);
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    
+    if (hours < 1) return 'Just now';
+    if (hours < 24) return `${hours}h ago`;
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days}d ago`;
+    return null; // Use regular date for older transactions
+  };
+
+  // Filter and sort transactions
+  const filteredTransactions = transactions
+    .filter(transaction => {
+      const matchesSearch = transaction.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesCategory = filterCategory === 'all' || transaction.category === filterCategory
+      const matchesType = filterType === 'all' || transaction.type === filterType
+      return matchesSearch && matchesCategory && matchesType
+    })
+    .sort((a, b) => {
+      // Convert to timestamps for reliable comparison
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      
+      // If dates are the same, sort by creation time (more recent first)
+      if (dateA === dateB) {
+        const createdA = new Date(a.createdAt).getTime()
+        const createdB = new Date(b.createdAt).getTime()
+        return createdB - createdA
+      }
+      
+      return dateB - dateA // Most recent date first
+    })
 
   // Get unique categories for filter
   const categories = [...new Set(transactions.map(tx => tx.category))]
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 pb-24">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Cash Flow Management</h1>
-            <p className="text-gray-600 mt-1">Track income, expenses and financial performance</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cash Flow Management</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">Track income, expenses and financial performance</p>
           </div>
           <button
             onClick={() => {
@@ -220,92 +259,111 @@ export default function CashFlow() {
                 cattleAge: ''
               })
             }}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <DollarSign className="w-4 h-4" />
-            Add Transaction
+            <span className="sm:inline">Add Transaction</span>
           </button>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow border">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Income</p>
-                <p className="text-2xl font-bold text-green-600">{formatPKR(totalIncome)}</p>
+                <p className="text-gray-600 text-xs sm:text-sm">Total Income</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-600">{formatPKRCompact(totalIncome)}</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-500" />
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Expenses</p>
-                <p className="text-2xl font-bold text-red-600">{formatPKR(totalExpenses)}</p>
+                <p className="text-gray-600 text-xs sm:text-sm">Total Expenses</p>
+                <p className="text-lg sm:text-2xl font-bold text-red-600">{formatPKRCompact(totalExpenses)}</p>
               </div>
-              <TrendingDown className="w-8 h-8 text-red-500" />
+              <TrendingDown className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Net Profit</p>
-                <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPKR(netProfit)}
+                <p className="text-gray-600 text-xs sm:text-sm">Net Profit</p>
+                <p className={`text-lg sm:text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatPKRCompact(netProfit)}
                 </p>
               </div>
-              <Target className="w-8 h-8 text-blue-500" />
+              <Target className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Profit Margin</p>
-                <p className={`text-2xl font-bold ${profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className="text-gray-600 text-xs sm:text-sm">Profit Margin</p>
+                <p className={`text-lg sm:text-2xl font-bold ${profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {profitMargin}%
                 </p>
               </div>
-              <BarChart3 className="w-8 h-8 text-purple-500" />
+              <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
             </div>
           </div>
         </div>
 
         {/* Transactions Table */}
         <div className="bg-white rounded-lg shadow border">
-          <div className="p-6 border-b">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Recent Transactions</h2>
-              <div className="flex gap-4">
-                <div className="relative">
+          <div className="p-4 sm:p-6 border-b">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h2 className="text-lg sm:text-xl font-semibold">Recent Transactions</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                  Sorted by most recent first • {filteredTransactions.length} transactions
+                </p>
+              </div>
+              
+              {/* Mobile-first filters */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div className="relative flex-1">
                   <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search transactions..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </div>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
+                <div className="flex gap-3 sm:gap-4">
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                  </select>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full">
+            {/* Desktop Table View */}
+            <table className="w-full hidden sm:table">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left p-4 font-medium text-gray-700">Date</th>
@@ -327,11 +385,36 @@ export default function CashFlow() {
                     <td colSpan="7" className="text-center p-8 text-gray-500">No transactions found</td>
                   </tr>
                 ) : (
-                  filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id} className="border-b hover:bg-gray-50">
-                      <td className="p-4">
-                        {new Date(transaction.date).toLocaleDateString()}
-                      </td>
+                  filteredTransactions.map((transaction, index) => {
+                    const transactionDate = new Date(transaction.date);
+                    const now = new Date();
+                    const timeDiff = now - transactionDate;
+                    const isToday = timeDiff < 24 * 60 * 60 * 1000; // Less than 24 hours
+                    const isRecent = timeDiff < 7 * 24 * 60 * 60 * 1000; // Less than 7 days
+                    
+                    return (
+                      <tr 
+                        key={transaction.id} 
+                        className={`border-b hover:bg-gray-50 ${
+                          isToday ? 'bg-blue-50 border-blue-200' : 
+                          isRecent ? 'bg-gray-50' : ''
+                        }`}
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            {isToday && (
+                              <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                            )}
+                            <div className={isToday ? 'font-medium text-blue-700' : ''}>
+                              <div>{transactionDate.toLocaleDateString()}</div>
+                              {getRelativeTime(transaction.date) && (
+                                <div className="text-xs text-gray-500">
+                                  {getRelativeTime(transaction.date)}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
                       <td className="p-4 font-medium">{transaction.name}</td>
                       <td className="p-4">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
@@ -368,33 +451,128 @@ export default function CashFlow() {
                         </div>
                       </td>
                     </tr>
-                  ))
+                    )
+                  })
                 )}
               </tbody>
             </table>
+
+            {/* Mobile Card View */}
+            <div className="sm:hidden">
+              {loading ? (
+                <div className="text-center p-8 text-gray-500">Loading...</div>
+              ) : filteredTransactions.length === 0 ? (
+                <div className="text-center p-8 text-gray-500">No transactions found</div>
+              ) : (
+                <div className="space-y-3 p-4">
+                  {filteredTransactions.map((transaction) => {
+                    const transactionDate = new Date(transaction.date);
+                    const now = new Date();
+                    const timeDiff = now - transactionDate;
+                    const isToday = timeDiff < 24 * 60 * 60 * 1000;
+                    const isRecent = timeDiff < 7 * 24 * 60 * 60 * 1000;
+                    
+                    return (
+                      <div 
+                        key={transaction.id}
+                        className={`bg-white border rounded-lg p-4 ${
+                          isToday ? 'border-blue-200 bg-blue-50' : 
+                          isRecent ? 'border-gray-200' : 'border-gray-100'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              {isToday && (
+                                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                              )}
+                              <h3 className={`font-medium text-sm ${isToday ? 'text-blue-700' : 'text-gray-900'}`}>
+                                {transaction.name}
+                              </h3>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span>{transactionDate.toLocaleDateString()}</span>
+                              {getRelativeTime(transaction.date) && (
+                                <>
+                                  <span>•</span>
+                                  <span>{getRelativeTime(transaction.date)}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEdit(transaction)}
+                              className="text-blue-600 hover:text-blue-800 p-1"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(transaction.id)}
+                              className="text-red-600 hover:text-red-800 p-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                transaction.type === 'income' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {transaction.type}
+                              </span>
+                              <span className="text-xs text-gray-600">{transaction.category}</span>
+                            </div>
+                            {(transaction.cattle?.name || transaction.staff?.name) && (
+                              <div className="text-xs text-gray-500">
+                                Related: {transaction.cattle?.name || transaction.staff?.name}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <span className={`font-bold text-lg ${
+                              transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {formatPKRCompact(transaction.amount)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Add/Edit Transaction Modal */}
         {showAddTransaction && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold">
-                  {editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}
-                </h3>
-                <button
-                  onClick={() => {
-                    setShowAddTransaction(false)
-                    setEditingTransaction(null)
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+            <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="sticky top-0 bg-white p-4 sm:p-6 border-b">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">
+                    {editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setShowAddTransaction(false)
+                      setEditingTransaction(null)
+                    }}
+                    className="text-gray-500 hover:text-gray-700 p-1"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Transaction Name
@@ -629,7 +807,7 @@ export default function CashFlow() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   >
                     {editingTransaction ? 'Update Transaction' : 'Add Transaction'}
                   </button>
@@ -639,7 +817,7 @@ export default function CashFlow() {
                       setShowAddTransaction(false)
                       setEditingTransaction(null)
                     }}
-                    className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm sm:text-base"
                   >
                     Cancel
                   </button>
