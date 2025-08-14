@@ -63,6 +63,8 @@ export default function Dashboard() {
           transactionsRes.json(),
           milkRes.json()
         ])
+        // Ensure milkProductions is always an array
+        const milkArray = Array.isArray(milkProductions) ? milkProductions : [];
         setStats([
           {
             title: 'Total Cattle',
@@ -74,7 +76,7 @@ export default function Dashboard() {
           },
           {
             title: 'Milk Production',
-            value: milkProductions.reduce((sum, m) => sum + (m.litres || 0), 0) + 'L',
+            value: milkArray.reduce((sum, m) => sum + (m.litres || 0), 0) + 'L',
             change: '+0%',
             icon: Milk,
             gradient: 'from-green-500 to-green-600',

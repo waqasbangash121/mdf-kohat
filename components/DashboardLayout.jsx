@@ -48,7 +48,7 @@ export default function DashboardLayout({ children, title }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main className="flex-1 overflow-y-auto pb-16">
         {children}
       </main>
 
@@ -60,7 +60,7 @@ export default function DashboardLayout({ children, title }) {
         {/* Active Tab Indicator */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500"></div>
         
-        <div className="relative z-10 flex justify-around items-center px-2 py-3 sm:py-4">
+        <div className="relative z-10 flex justify-around items-center px-2 py-2 sm:py-3">
           {menuItems.map((item, index) => {
             const Icon = item.icon
             const isActive = activeTab === item.id
@@ -68,28 +68,28 @@ export default function DashboardLayout({ children, title }) {
               <button
                 key={item.id}
                 onClick={() => handleNavigation(item)}
-                className={`group flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-300 min-w-0 flex-1 transform ${
+                className={`group flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all duration-300 min-w-0 flex-1 transform ${
                   isActive
-                    ? 'text-white scale-105 -translate-y-1'
+                    ? 'text-white scale-105 -translate-y-0.5'
                     : 'text-gray-500 hover:text-gray-700 hover:scale-105 hover:-translate-y-0.5'
                 }`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Enhanced Icon Container */}
-                <div className={`relative p-3 sm:p-4 rounded-2xl transition-all duration-500 ${
+                <div className={`relative p-2 sm:p-2.5 rounded-xl transition-all duration-500 ${
                   isActive 
-                    ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 shadow-2xl' 
-                    : 'bg-gray-50 group-hover:bg-gray-100 group-hover:shadow-lg'
+                    ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 shadow-lg' 
+                    : 'bg-gray-50 group-hover:bg-gray-100 group-hover:shadow-md'
                 }`}>
                   {/* Floating Animation Circles for Active State */}
                   {isActive && (
                     <>
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-white/30 rounded-full animate-ping"></div>
-                      <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-white/40 rounded-full animate-pulse"></div>
+                      <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-white/30 rounded-full animate-ping"></div>
+                      <div className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse"></div>
                     </>
                   )}
                   
-                  <Icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 ${
+                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 transition-all duration-300 ${
                     isActive 
                       ? 'text-white' 
                       : 'text-gray-600 group-hover:text-gray-800'
@@ -97,12 +97,12 @@ export default function DashboardLayout({ children, title }) {
                   
                   {/* Active Glow Effect */}
                   {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 rounded-2xl opacity-20 blur-md"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 rounded-xl opacity-20 blur-sm"></div>
                   )}
                 </div>
                 
                 {/* Enhanced Label */}
-                <span className={`text-xs sm:text-sm font-semibold mt-2 transition-all duration-300 ${
+                <span className={`text-xs font-medium mt-1 transition-all duration-300 ${
                   isActive 
                     ? 'text-gray-800' 
                     : 'text-gray-500 group-hover:text-gray-700'
@@ -112,7 +112,7 @@ export default function DashboardLayout({ children, title }) {
                 
                 {/* Active Indicator Dot */}
                 {isActive && (
-                  <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
+                  <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
                 )}
               </button>
             )

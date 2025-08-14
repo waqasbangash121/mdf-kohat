@@ -13,6 +13,9 @@ export default function CashFlow() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterType, setFilterType] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1) // Pagination state
+  const [mounted, setMounted] = useState(false) // Add mounted state for hydration
+  const transactionsPerPage = 8
   
   // Database state
   const [cattleData, setCattleData] = useState([])
@@ -47,6 +50,11 @@ export default function CashFlow() {
   // Load data from database
   useEffect(() => {
     loadData()
+  }, [])
+
+  // Set mounted to true after component mounts (for hydration fix)
+  useEffect(() => {
+    setMounted(true)
   }, [])
 
   async function loadData() {
@@ -87,6 +95,23 @@ export default function CashFlow() {
 
   const netProfit = totalIncome - totalExpenses;
   const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(2) : 0;
+
+  // Safe formatting function to prevent hydration errors
+  const safeFormatPKRCompact = (amount) => {
+    if (!mounted) {
+      // Return a simple format during SSR to match initial client render
+      return `Rs ${amount.toLocaleString()}`
+    }
+    return formatPKRCompact(amount)
+  }
+
+  const safeFormatPKR = (amount) => {
+    if (!mounted) {
+      // Return a simple format during SSR to match initial client render
+      return `Rs ${amount.toLocaleString()}`
+    }
+    return formatPKR(amount)
+  }
 
   // Handle form changes
   const handleFormChange = (field, value) => {
@@ -226,12 +251,24 @@ export default function CashFlow() {
       return dateB - dateA // Most recent date first
     })
 
+  // Pagination calculations
+  const totalTransactions = filteredTransactions.length;
+  const totalPages = Math.ceil(totalTransactions / transactionsPerPage);
+  const startIndex = (currentPage - 1) * transactionsPerPage;
+  const endIndex = startIndex + transactionsPerPage;
+  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterCategory, filterType]);
+
   // Get unique categories for filter
   const categories = [...new Set(transactions.map(tx => tx.category))]
 
   return (
     <DashboardLayout>
-      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 pb-24">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 pb-16">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
@@ -272,7 +309,7 @@ export default function CashFlow() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-xs sm:text-sm">Total Income</p>
-                <p className="text-lg sm:text-2xl font-bold text-green-600">{formatPKRCompact(totalIncome)}</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-600">{safeFormatPKRCompact(totalIncome)}</p>
               </div>
               <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
             </div>
@@ -282,7 +319,7 @@ export default function CashFlow() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-xs sm:text-sm">Total Expenses</p>
-                <p className="text-lg sm:text-2xl font-bold text-red-600">{formatPKRCompact(totalExpenses)}</p>
+                <p className="text-lg sm:text-2xl font-bold text-red-600">{safeFormatPKRCompact(totalExpenses)}</p>
               </div>
               <TrendingDown className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
             </div>
@@ -293,7 +330,7 @@ export default function CashFlow() {
               <div>
                 <p className="text-gray-600 text-xs sm:text-sm">Net Profit</p>
                 <p className={`text-lg sm:text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPKRCompact(netProfit)}
+                  {safeFormatPKRCompact(netProfit)}
                 </p>
               </div>
               <Target className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
@@ -319,9 +356,16 @@ export default function CashFlow() {
             <div className="flex flex-col gap-4">
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold">Recent Transactions</h2>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                  Sorted by most recent first • {filteredTransactions.length} transactions
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    Sorted by most recent first • {totalTransactions} total transactions
+                  </p>
+                  {totalTransactions > 0 && (
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      Showing {startIndex + 1}-{Math.min(endIndex, totalTransactions)} of {totalTransactions}
+                    </p>
+                  )}
+                </div>
               </div>
               
               {/* Mobile-first filters */}
@@ -380,12 +424,12 @@ export default function CashFlow() {
                   <tr>
                     <td colSpan="7" className="text-center p-8 text-gray-500">Loading...</td>
                   </tr>
-                ) : filteredTransactions.length === 0 ? (
+                ) : paginatedTransactions.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center p-8 text-gray-500">No transactions found</td>
                   </tr>
                 ) : (
-                  filteredTransactions.map((transaction, index) => {
+                  paginatedTransactions.map((transaction, index) => {
                     const transactionDate = new Date(transaction.date);
                     const now = new Date();
                     const timeDiff = now - transactionDate;
@@ -428,7 +472,7 @@ export default function CashFlow() {
                       <td className="p-4">{transaction.category}</td>
                       <td className="p-4 font-medium">
                         <span className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
-                          {formatPKR(transaction.amount)}
+                          {safeFormatPKR(transaction.amount)}
                         </span>
                       </td>
                       <td className="p-4">
@@ -461,11 +505,11 @@ export default function CashFlow() {
             <div className="sm:hidden">
               {loading ? (
                 <div className="text-center p-8 text-gray-500">Loading...</div>
-              ) : filteredTransactions.length === 0 ? (
+              ) : paginatedTransactions.length === 0 ? (
                 <div className="text-center p-8 text-gray-500">No transactions found</div>
               ) : (
                 <div className="space-y-3 p-4">
-                  {filteredTransactions.map((transaction) => {
+                  {paginatedTransactions.map((transaction) => {
                     const transactionDate = new Date(transaction.date);
                     const now = new Date();
                     const timeDiff = now - transactionDate;
@@ -538,7 +582,7 @@ export default function CashFlow() {
                             <span className={`font-bold text-lg ${
                               transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {formatPKRCompact(transaction.amount)}
+                              {safeFormatPKRCompact(transaction.amount)}
                             </span>
                           </div>
                         </div>
@@ -548,6 +592,64 @@ export default function CashFlow() {
                 </div>
               )}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-6 px-4 pb-4">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  
+                  <div className="flex space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                      // Show first page, last page, current page, and pages around current
+                      if (
+                        page === 1 || 
+                        page === totalPages || 
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                              currentPage === page
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      } else if (
+                        (page === currentPage - 2 && currentPage > 3) ||
+                        (page === currentPage + 2 && currentPage < totalPages - 2)
+                      ) {
+                        return <span key={page} className="px-2 text-gray-500">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+                
+                <div className="text-sm text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
