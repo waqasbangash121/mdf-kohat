@@ -977,7 +977,7 @@ export default function CattleManagement() {
               </h3>
               
               <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
-                Are you sure you want to delete <span className="font-semibold text-gray-800">"{deletingCattle.name}"</span>? 
+                Are you sure you want to delete <span className="font-semibold text-gray-800">&ldquo;{deletingCattle.name}&rdquo;</span>? 
                 This action cannot be undone.
               </p>
               
