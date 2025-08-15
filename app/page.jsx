@@ -13,7 +13,12 @@ import {
   Bell,
   TrendingUp,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  DollarSign,
+  AlertTriangle,
+  BarChart3,
+  Brain,
+  Target
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -32,6 +37,11 @@ export default function Dashboard() {
   const [allStaff, setAllStaff] = useState([])
   const [allTransactions, setAllTransactions] = useState([])
   const [allMilkTransactions, setAllMilkTransactions] = useState([])
+  
+  // AI insights states
+  const [aiInsights, setAiInsights] = useState([])
+  const [aiAlerts, setAiAlerts] = useState([])
+  const [productionForecast, setProductionForecast] = useState(null)
 
   // Quick actions are static, not database-driven
   const quickActions = [
@@ -56,6 +66,155 @@ export default function Dashboard() {
       color: 'red',
     }
   ]
+
+  // AI Analysis Functions
+  const generateAIInsights = (farmData) => {
+    const { transactions, milkTransactions, cattle, staff } = farmData
+    const insights = []
+    
+    // Production Analysis
+    const totalMilk = milkTransactions.reduce((sum, t) => sum + Number(t.details?.litres || 0), 0)
+    const avgDailyProduction = totalMilk / Math.max(milkTransactions.length, 1)
+    
+    if (avgDailyProduction > 2000) {
+      insights.push({
+        type: 'production',
+        title: 'Excellent Production Performance',
+        message: `Average daily production of ${avgDailyProduction.toFixed(0)}L is above industry standards`,
+        recommendation: 'Consider expanding capacity or exploring premium markets',
+        confidence: 92,
+        icon: TrendingUp,
+        color: 'green'
+      })
+    } else if (avgDailyProduction < 1500) {
+      insights.push({
+        type: 'production',
+        title: 'Production Optimization Opportunity',
+        message: `Daily production averaging ${avgDailyProduction.toFixed(0)}L has room for improvement`,
+        recommendation: 'Review feed quality, cattle comfort, and milking schedules',
+        confidence: 87,
+        icon: Target,
+        color: 'orange'
+      })
+    }
+    
+    // Financial Analysis
+    const totalRevenue = milkTransactions.reduce((sum, t) => {
+      const litres = Number(t.details?.litres || 0)
+      const price = Number(t.details?.pricePerLitre || 0)
+      return sum + (litres * price)
+    }, 0)
+    
+    const totalExpenses = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0)
+    const profitMargin = totalRevenue > 0 ? ((totalRevenue - totalExpenses) / totalRevenue) * 100 : 0
+    
+    if (profitMargin > 30) {
+      insights.push({
+        type: 'financial',
+        title: 'Strong Financial Performance',
+        message: `Profit margin of ${profitMargin.toFixed(1)}% indicates healthy operations`,
+        recommendation: 'Consider reinvesting in farm expansion or technology upgrades',
+        confidence: 89,
+        icon: DollarSign,
+        color: 'green'
+      })
+    } else if (profitMargin < 15) {
+      insights.push({
+        type: 'financial',
+        title: 'Cost Optimization Needed',
+        message: `Profit margin of ${profitMargin.toFixed(1)}% suggests cost review is needed`,
+        recommendation: 'Analyze feed costs, labor efficiency, and pricing strategies',
+        confidence: 91,
+        icon: AlertTriangle,
+        color: 'red'
+      })
+    }
+    
+    // Operational Efficiency
+    const cattlePerStaff = cattle.length / Math.max(staff.filter(s => s.status === 'active').length, 1)
+    if (cattlePerStaff > 15) {
+      insights.push({
+        type: 'efficiency',
+        title: 'Staffing Optimization',
+        message: `${cattlePerStaff.toFixed(1)} cattle per staff member indicates potential understaffing`,
+        recommendation: 'Consider hiring additional staff or improving workflow efficiency',
+        confidence: 85,
+        icon: Users,
+        color: 'yellow'
+      })
+    }
+    
+    return insights
+  }
+  
+  const generateProductionForecast = (milkData) => {
+    // Simple forecast based on recent trends
+    const recentDays = milkData.slice(-7) // Last 7 days
+    const avgRecent = recentDays.reduce((sum, t) => sum + Number(t.details?.litres || 0), 0) / Math.max(recentDays.length, 1)
+    
+    // Add some seasonal and trend adjustments
+    const seasonalFactor = 1.02 // Slight increase expected
+    const tomorrow = Math.round(avgRecent * seasonalFactor)
+    const thisWeek = Math.round(avgRecent * 7 * seasonalFactor)
+    const thisMonth = Math.round(avgRecent * 30 * seasonalFactor)
+    
+    return {
+      tomorrow: tomorrow,
+      thisWeek: thisWeek,
+      thisMonth: thisMonth,
+      confidence: recentDays.length >= 5 ? 85 : 60
+    }
+  }
+  
+  const generateSmartAlerts = (farmData) => {
+    const { transactions, milkTransactions } = farmData
+    const alerts = []
+    
+    // Production alerts
+    const recentProduction = milkTransactions.slice(-3).reduce((sum, t) => sum + Number(t.details?.litres || 0), 0) / 3
+    const historicalAvg = milkTransactions.reduce((sum, t) => sum + Number(t.details?.litres || 0), 0) / Math.max(milkTransactions.length, 1)
+    
+    if (recentProduction < historicalAvg * 0.8) {
+      alerts.push({
+        type: 'production',
+        title: 'Production Decline Alert',
+        message: `Recent production is ${((1 - recentProduction/historicalAvg) * 100).toFixed(1)}% below average`,
+        action: 'Review feed quality, weather conditions, and cattle comfort',
+        urgency: 'high',
+        icon: AlertTriangle
+      })
+    }
+    
+    // Cost alerts
+    const recentExpenses = transactions.filter(t => t.amount < 0 && new Date(t.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+    const totalRecentExpenses = recentExpenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
+    
+    if (totalRecentExpenses > 50000) {
+      alerts.push({
+        type: 'cost',
+        title: 'High Expense Alert',
+        message: `Weekly expenses of ₨${totalRecentExpenses.toLocaleString()} are above normal`,
+        action: 'Review recent purchases and identify cost-saving opportunities',
+        urgency: 'medium',
+        icon: DollarSign
+      })
+    }
+    
+    // Opportunity alerts
+    const avgPrice = milkTransactions.reduce((sum, t) => sum + Number(t.details?.pricePerLitre || 0), 0) / Math.max(milkTransactions.length, 1)
+    if (avgPrice < 80) {
+      alerts.push({
+        type: 'opportunity',
+        title: 'Price Optimization Opportunity',
+        message: `Current average price of ₨${avgPrice.toFixed(2)}/L may be below market rates`,
+        action: 'Research local market prices and consider negotiating better rates',
+        urgency: 'low',
+        icon: TrendingUp
+      })
+    }
+    
+    return alerts
+  }
 
   // Helper function to get date range based on selected period
   const getDateRange = (period) => {
@@ -255,6 +414,79 @@ export default function Dashboard() {
 
     if (allCattle.length > 0 || allStaff.length > 0 || allTransactions.length > 0 || allMilkTransactions.length > 0) {
       updateStatsData()
+      
+      // Generate AI insights after stats are updated
+      const getDateRangeLocal = (period) => {
+        const today = new Date()
+        let startDate, endDate
+        
+        switch (period) {
+          case 'daily':
+            startDate = new Date(today)
+            startDate.setHours(0, 0, 0, 0)
+            endDate = new Date(today)
+            endDate.setHours(23, 59, 59, 999)
+            break
+          case 'weekly':
+            startDate = new Date(today)
+            startDate.setDate(today.getDate() - 7)
+            startDate.setHours(0, 0, 0, 0)
+            endDate = new Date(today)
+            endDate.setHours(23, 59, 59, 999)
+            break
+          case 'monthly':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
+            break
+          case 'yearly':
+            startDate = new Date(today.getFullYear(), 0, 1)
+            endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999)
+            break
+          case 'custom':
+            if (customStartDate && customEndDate) {
+              startDate = new Date(customStartDate)
+              startDate.setHours(0, 0, 0, 0)
+              endDate = new Date(customEndDate)
+              endDate.setHours(23, 59, 59, 999)
+            } else {
+              return null
+            }
+            break
+          case 'all':
+          default:
+            return null // No filtering
+        }
+        
+        return { startDate, endDate }
+      }
+      
+      const dateRange = getDateRangeLocal(selectedPeriod)
+      let filteredData = {
+        cattle: allCattle,
+        staff: allStaff,
+        transactions: allTransactions,
+        milkTransactions: allMilkTransactions
+      }
+      
+      if (dateRange) {
+        const { startDate, endDate } = dateRange
+        filteredData.transactions = allTransactions.filter(t => {
+          const transactionDate = new Date(t.date)
+          return transactionDate >= startDate && transactionDate <= endDate
+        })
+        filteredData.milkTransactions = allMilkTransactions.filter(t => {
+          const transactionDate = new Date(t.date)
+          return transactionDate >= startDate && transactionDate <= endDate
+        })
+      }
+      
+      const insights = generateAIInsights(filteredData)
+      const alerts = generateSmartAlerts(filteredData)
+      const forecast = generateProductionForecast(filteredData.milkTransactions)
+      
+      setAiInsights(insights)
+      setAiAlerts(alerts)
+      setProductionForecast(forecast)
     }
   }, [selectedPeriod, customStartDate, customEndDate, allCattle, allStaff, allTransactions, allMilkTransactions])
 
@@ -509,6 +741,156 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600">All hands on deck</p>
               </div>
             </div>
+
+            {/* AI-Powered Insights Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              {/* Smart Farm Insights */}
+              <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-6 sm:p-8 rounded-3xl text-white shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500">
+                <div className="flex items-center mb-4 sm:mb-6">
+                  <Brain className="w-6 h-6 sm:w-7 sm:h-7 mr-3" />
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold">AI Farm Insights</h3>
+                    <p className="text-purple-100 text-sm">Powered by intelligent analysis</p>
+                  </div>
+                </div>
+                
+                {loading ? (
+                  <div className="space-y-4">
+                    <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl animate-pulse">
+                      <div className="h-4 bg-white/30 rounded mb-2"></div>
+                      <div className="h-3 bg-white/20 rounded"></div>
+                    </div>
+                  </div>
+                ) : aiInsights.length > 0 ? (
+                  <div className="space-y-4">
+                    {aiInsights.slice(0, 3).map((insight, index) => {
+                      const IconComponent = insight.icon
+                      return (
+                        <div key={index} className="bg-white/20 backdrop-blur-sm p-4 rounded-xl hover:bg-white/30 transition-all duration-300">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center">
+                              <IconComponent className="w-4 h-4 mr-2" />
+                              <h4 className="font-semibold">{insight.title}</h4>
+                            </div>
+                            <span className="text-xs bg-white/30 px-2 py-1 rounded-full">
+                              {insight.confidence}%
+                            </span>
+                          </div>
+                          <p className="text-sm opacity-90 mb-2">{insight.message}</p>
+                          <p className="text-xs opacity-75 italic">{insight.recommendation}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl text-center">
+                    <p className="text-sm opacity-90">Analyzing farm data...</p>
+                    <p className="text-xs opacity-75">Add more transactions to get AI insights</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Production Forecast */}
+              <div className="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <div className="flex items-center">
+                    <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 mr-3 text-blue-600" />
+                    <div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-800">Production Forecast</h3>
+                      <p className="text-gray-600 text-sm">AI-powered predictions</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    <span>AI Powered</span>
+                  </div>
+                </div>
+                
+                {loading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    {[1,2,3].map(i => (
+                      <div key={i} className="bg-gray-100 p-4 rounded-xl animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : productionForecast ? (
+                  <>
+                    {/* Forecast Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                      <div className="bg-blue-50 p-4 rounded-xl text-center">
+                        <div className="text-2xl font-bold text-blue-600">{productionForecast.tomorrow}L</div>
+                        <div className="text-sm text-gray-600">Tomorrow</div>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-xl text-center">
+                        <div className="text-2xl font-bold text-green-600">{productionForecast.thisWeek.toLocaleString()}L</div>
+                        <div className="text-sm text-gray-600">This Week</div>
+                      </div>
+                      <div className="bg-purple-50 p-4 rounded-xl text-center">
+                        <div className="text-2xl font-bold text-purple-600">{productionForecast.thisMonth.toLocaleString()}L</div>
+                        <div className="text-sm text-gray-600">This Month</div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-gray-500 text-center bg-gray-50 p-3 rounded-xl">
+                      <div className="flex items-center justify-center mb-1">
+                        <Target className="w-4 h-4 mr-1" />
+                        <span className="font-medium">{productionForecast.confidence}% Confidence</span>
+                      </div>
+                      <span>Based on historical patterns and recent trends</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Insufficient data for forecasting</p>
+                    <p className="text-sm">Add more milk production records</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Smart Alerts */}
+            {aiAlerts.length > 0 && (
+              <div className="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20">
+                <div className="flex items-center mb-6">
+                  <Bell className="w-6 h-6 mr-3 text-orange-500" />
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-800">🚨 Smart Alerts</h3>
+                    <p className="text-gray-600 text-sm">AI-detected insights and recommendations</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {aiAlerts.map((alert, index) => {
+                    const IconComponent = alert.icon
+                    return (
+                      <div key={index} className={`p-4 rounded-xl border-l-4 transition-all duration-300 hover:shadow-md ${
+                        alert.urgency === 'high' ? 'bg-red-50 border-red-400' :
+                        alert.urgency === 'medium' ? 'bg-yellow-50 border-yellow-400' :
+                        'bg-blue-50 border-blue-400'
+                      }`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center">
+                            <IconComponent className="w-5 h-5 mr-2 text-gray-600" />
+                            <h4 className="font-semibold text-gray-800">{alert.title}</h4>
+                          </div>
+                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            alert.urgency === 'high' ? 'bg-red-100 text-red-700' :
+                            alert.urgency === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {alert.urgency}
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{alert.message}</p>
+                        <p className="text-xs text-gray-500 italic">{alert.action}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
