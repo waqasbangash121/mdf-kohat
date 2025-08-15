@@ -225,70 +225,64 @@ export default function MilkProduction() {
 
             {/* Beautiful Filter Section */}
             <div className="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20">
-              <div className="flex flex-col lg:flex-row gap-6">
-                <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                  <select
-                    value={selectedPeriod}
-                    onChange={(e) => setSelectedPeriod(e.target.value)}
-                    className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-base font-medium"
-                  >
-                    <optgroup label="Current Periods">
-                      <option value="week">This Week</option>
-                      <option value="month">This Month</option>
-                      <option value="quarter">This Quarter</option>
-                      <option value="year">This Year</option>
-                    </optgroup>
-                    <optgroup label="Previous Periods">
-                      <option value="lastWeek">Last Week</option>
-                      <option value="lastMonth">Last Month</option>
-                      <option value="lastYear">Last Year</option>
-                    </optgroup>
-                    <optgroup label="Custom">
-                      <option value="customMonth">Select Month...</option>
-                      <option value="customRange">Select Date Range...</option>
-                    </optgroup>
-                  </select>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <select
+                  value={selectedPeriod}
+                  onChange={(e) => setSelectedPeriod(e.target.value)}
+                  className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-base font-medium"
+                >
+                  <optgroup label="Current Periods">
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="quarter">This Quarter</option>
+                    <option value="year">This Year</option>
+                  </optgroup>
+                  <optgroup label="Previous Periods">
+                    <option value="lastWeek">Last Week</option>
+                    <option value="lastMonth">Last Month</option>
+                    <option value="lastYear">Last Year</option>
+                  </optgroup>
+                  <optgroup label="Custom">
+                    <option value="customMonth">Select Month...</option>
+                    <option value="customRange">Select Date Range...</option>
+                  </optgroup>
+                </select>
 
-                  {/* Chart View Selector */}
-                  <select
-                    value={chartView}
-                    onChange={(e) => setChartView(e.target.value)}
-                    className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 text-base font-medium"
-                  >
-                    <option value="daily">Daily View</option>
-                    <option value="weekly">Weekly View</option>
-                    <option value="monthly">Monthly View</option>
-                  </select>
+                {/* Chart View Selector */}
+                <select
+                  value={chartView}
+                  onChange={(e) => setChartView(e.target.value)}
+                  className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 text-base font-medium"
+                >
+                  <option value="daily">Daily View</option>
+                  <option value="weekly">Weekly View</option>
+                  <option value="monthly">Monthly View</option>
+                </select>
 
-                  {/* Custom Month Picker */}
-                  {selectedPeriod === 'customMonth' && (
+                {/* Custom Month Picker */}
+                {selectedPeriod === 'customMonth' && (
+                  <input
+                    type="month"
+                    className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-300"
+                    onChange={e => setCustomMonth(e.target.value)}
+                  />
+                )}
+                {/* Custom Date Range Picker */}
+                {selectedPeriod === 'customRange' && (
+                  <div className="flex items-center gap-3">
                     <input
-                      type="month"
+                      type="date"
                       className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-300"
-                      onChange={e => setCustomMonth(e.target.value)}
+                      onChange={e => setCustomStart(e.target.value)}
                     />
-                  )}
-                  {/* Custom Date Range Picker */}
-                  {selectedPeriod === 'customRange' && (
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="date"
-                        className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-300"
-                        onChange={e => setCustomStart(e.target.value)}
-                      />
-                      <span className="text-gray-500 font-medium">to</span>
-                      <input
-                        type="date"
-                        className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-300"
-                        onChange={e => setCustomEnd(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
-                <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl hover:from-blue-700 hover:to-cyan-700 flex items-center justify-center font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg">
-                  <Filter className="w-5 h-5 mr-2" />
-                  Apply Filter
-                </button>
+                    <span className="text-gray-500 font-medium">to</span>
+                    <input
+                      type="date"
+                      className="px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-300"
+                      onChange={e => setCustomEnd(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

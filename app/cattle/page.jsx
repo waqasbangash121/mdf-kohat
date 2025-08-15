@@ -30,7 +30,12 @@ export default function CattleManagement() {
   // Add Cattle
   const handleAddCattle = async (e) => {
     e.preventDefault()
+    
+    if (isSubmitting) return // Prevent double submission
+    
     try {
+      setIsSubmitting(true) // Start loading
+      
       // Convert price and age to numbers, date to Date
       const cattleDataToSave = {
         name: formData.name,
@@ -47,9 +52,11 @@ export default function CattleManagement() {
       setCattleData(cattle)
       setFormData({ name: '', type: '', price: '', age: '', dateAdded: '' })
       setShowAddForm(false)
-  toast.success('Cattle added successfully!')
+      toast.success('Cattle added successfully!')
     } catch (error) {
-  toast.error('Failed to add cattle!')
+      toast.error('Failed to add cattle!')
+    } finally {
+      setIsSubmitting(false) // End loading
     }
   }
   const [searchTerm, setSearchTerm] = useState('')
@@ -70,6 +77,7 @@ export default function CattleManagement() {
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deletingCattle, setDeletingCattle] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     async function loadCattle() {
@@ -131,7 +139,12 @@ export default function CattleManagement() {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault()
+    
+    if (isSubmitting) return // Prevent double submission
+    
     try {
+      setIsSubmitting(true) // Start loading
+      
       const cattleDataToUpdate = {
         name: formData.name,
         type: formData.type,
@@ -148,6 +161,8 @@ export default function CattleManagement() {
       toast.success('Cattle updated successfully!')
     } catch (error) {
       toast.error('Failed to update cattle!')
+    } finally {
+      setIsSubmitting(false) // End loading
     }
   }
 
@@ -809,15 +824,43 @@ export default function CattleManagement() {
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl sm:rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl sm:rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                 >
-                  Add Cattle
+                  {isSubmitting ? (
+                    <>
+                      <svg 
+                        className="animate-spin h-5 w-5 text-white" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24"
+                      >
+                        <circle 
+                          className="opacity-25" 
+                          cx="12" 
+                          cy="12" 
+                          r="10" 
+                          stroke="currentColor" 
+                          strokeWidth="4"
+                        ></circle>
+                        <path 
+                          className="opacity-75" 
+                          fill="currentColor" 
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Adding Cattle...
+                    </>
+                  ) : (
+                    'Add Cattle'
+                  )}
                 </button>
               </div>
             </form>
@@ -953,15 +996,43 @@ export default function CattleManagement() {
                 <button
                   type="button"
                   onClick={handleCloseEditForm}
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                 >
-                  Save Changes
+                  {isSubmitting ? (
+                    <>
+                      <svg 
+                        className="animate-spin h-5 w-5 text-white" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24"
+                      >
+                        <circle 
+                          className="opacity-25" 
+                          cx="12" 
+                          cy="12" 
+                          r="10" 
+                          stroke="currentColor" 
+                          strokeWidth="4"
+                        ></circle>
+                        <path 
+                          className="opacity-75" 
+                          fill="currentColor" 
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Updating Cattle...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
                 </button>
               </div>
             </form>

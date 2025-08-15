@@ -21,6 +21,17 @@ export default function Dashboard() {
   const [stats, setStats] = useState([])
   const [recentActivities, setRecentActivities] = useState([])
   const [loading, setLoading] = useState(true)
+  
+  // Filter states
+  const [selectedPeriod, setSelectedPeriod] = useState('all')
+  const [customStartDate, setCustomStartDate] = useState('')
+  const [customEndDate, setCustomEndDate] = useState('')
+  
+  // Raw data states
+  const [allCattle, setAllCattle] = useState([])
+  const [allStaff, setAllStaff] = useState([])
+  const [allTransactions, setAllTransactions] = useState([])
+  const [allMilkTransactions, setAllMilkTransactions] = useState([])
 
   // Quick actions are static, not database-driven
   const quickActions = [
@@ -43,9 +54,209 @@ export default function Dashboard() {
       description: 'Book a veterinary appointment',
       icon: Activity, 
       color: 'red',
-      gradient: 'from-red-500 to-red-600'
     }
   ]
+
+  // Helper function to get date range based on selected period
+  const getDateRange = (period) => {
+    const today = new Date()
+    let startDate, endDate
+    
+    switch (period) {
+      case 'daily':
+        startDate = new Date(today)
+        startDate.setHours(0, 0, 0, 0)
+        endDate = new Date(today)
+        endDate.setHours(23, 59, 59, 999)
+        break
+      case 'weekly':
+        startDate = new Date(today)
+        startDate.setDate(today.getDate() - 7)
+        startDate.setHours(0, 0, 0, 0)
+        endDate = new Date(today)
+        endDate.setHours(23, 59, 59, 999)
+        break
+      case 'monthly':
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
+        break
+      case 'yearly':
+        startDate = new Date(today.getFullYear(), 0, 1)
+        endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999)
+        break
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          startDate = new Date(customStartDate)
+          startDate.setHours(0, 0, 0, 0)
+          endDate = new Date(customEndDate)
+          endDate.setHours(23, 59, 59, 999)
+        } else {
+          return null
+        }
+        break
+      case 'all':
+      default:
+        return null // No filtering
+    }
+    
+    return { startDate, endDate }
+  }
+
+  // Filter data based on selected period
+  const getFilteredData = () => {
+    const dateRange = getDateRange(selectedPeriod)
+    
+    if (!dateRange) {
+      // Return all data if no filtering
+      return {
+        cattle: allCattle,
+        staff: allStaff,
+        transactions: allTransactions,
+        milkTransactions: allMilkTransactions
+      }
+    }
+    
+    const { startDate, endDate } = dateRange
+    
+    // Filter transactions and milk transactions by date
+    const filteredTransactions = allTransactions.filter(t => {
+      const transactionDate = new Date(t.date)
+      return transactionDate >= startDate && transactionDate <= endDate
+    })
+    
+    const filteredMilkTransactions = allMilkTransactions.filter(t => {
+      const transactionDate = new Date(t.date)
+      return transactionDate >= startDate && transactionDate <= endDate
+    })
+    
+    // For cattle and staff, we show all active ones regardless of filter
+    // but could be enhanced to filter by creation date if needed
+    return {
+      cattle: allCattle,
+      staff: allStaff,
+      transactions: filteredTransactions,
+      milkTransactions: filteredMilkTransactions
+    }
+  }
+
+  // Update stats when filter changes
+  useEffect(() => {
+    const updateStatsData = () => {
+      // Helper function to get date range based on selected period
+      const getDateRange = (period) => {
+        const today = new Date()
+        let startDate, endDate
+        
+        switch (period) {
+          case 'daily':
+            startDate = new Date(today)
+            startDate.setHours(0, 0, 0, 0)
+            endDate = new Date(today)
+            endDate.setHours(23, 59, 59, 999)
+            break
+          case 'weekly':
+            startDate = new Date(today)
+            startDate.setDate(today.getDate() - 7)
+            startDate.setHours(0, 0, 0, 0)
+            endDate = new Date(today)
+            endDate.setHours(23, 59, 59, 999)
+            break
+          case 'monthly':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
+            break
+          case 'yearly':
+            startDate = new Date(today.getFullYear(), 0, 1)
+            endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999)
+            break
+          case 'custom':
+            if (customStartDate && customEndDate) {
+              startDate = new Date(customStartDate)
+              startDate.setHours(0, 0, 0, 0)
+              endDate = new Date(customEndDate)
+              endDate.setHours(23, 59, 59, 999)
+            } else {
+              return null
+            }
+            break
+          case 'all':
+          default:
+            return null // No filtering
+        }
+        
+        return { startDate, endDate }
+      }
+
+      // Filter data based on selected period
+      const dateRange = getDateRange(selectedPeriod)
+      let filteredTransactions = allTransactions
+      let filteredMilkTransactions = allMilkTransactions
+      
+      if (dateRange) {
+        const { startDate, endDate } = dateRange
+        
+        // Filter transactions and milk transactions by date
+        filteredTransactions = allTransactions.filter(t => {
+          const transactionDate = new Date(t.date)
+          return transactionDate >= startDate && transactionDate <= endDate
+        })
+        
+        filteredMilkTransactions = allMilkTransactions.filter(t => {
+          const transactionDate = new Date(t.date)
+          return transactionDate >= startDate && transactionDate <= endDate
+        })
+      }
+      
+      // Calculate total milk production from filtered milk transactions
+      const totalMilkLitres = filteredMilkTransactions.reduce((sum, transaction) => {
+        const litres = transaction.details?.litres || 0
+        return sum + Number(litres)
+      }, 0)
+      
+      setStats([
+        {
+          title: 'Active Cattle',
+          value: allCattle.filter(c => c.status === 'active').length,
+          change: '+0%',
+          icon: Circle,
+          gradient: 'from-blue-500 to-blue-600',
+          bgGradient: 'from-blue-50 to-blue-100'
+        },
+        {
+          title: 'Milk Production',
+          value: totalMilkLitres + 'L',
+          change: '+0%',
+          icon: Milk,
+          gradient: 'from-green-500 to-green-600',
+          bgGradient: 'from-green-50 to-green-100'
+        },
+        {
+          title: 'Active Staff',
+          value: allStaff.filter(s => s.status === 'active').length,
+          change: '+0',
+          icon: Users,
+          gradient: 'from-purple-500 to-purple-600',
+          bgGradient: 'from-purple-50 to-purple-100'
+        }
+      ])
+      
+      // Create recent activities from filtered transactions
+      const recentTransactions = filteredTransactions.slice(0, 5).map(t => ({
+        type: t.category,
+        title: t.name || 'Transaction',
+        description: t.category + (t.details?.litres ? ` - ${t.details.litres}L` : ''),
+        time: new Date(t.date).toLocaleDateString(),
+        icon: t.category === 'milk_sales' ? Milk : t.category === 'cattle_sale' ? Circle : t.category === 'health' ? Activity : Circle,
+        color: t.category === 'milk_sales' ? 'green' : t.category === 'cattle_sale' ? 'blue' : t.category === 'health' ? 'red' : 'blue'
+      }))
+      
+      setRecentActivities(recentTransactions)
+    }
+
+    if (allCattle.length > 0 || allStaff.length > 0 || allTransactions.length > 0 || allMilkTransactions.length > 0) {
+      updateStatsData()
+    }
+  }, [selectedPeriod, customStartDate, customEndDate, allCattle, allStaff, allTransactions, allMilkTransactions])
 
   useEffect(() => {
     async function loadDashboardData() {
@@ -57,18 +268,37 @@ export default function Dashboard() {
           fetch('/api/transaction'),
           fetch('/api/milk')
         ])
-        const [cattle, staff, transactions, milkProductions] = await Promise.all([
+        
+        // Check if all responses are ok
+        if (!cattleRes.ok) throw new Error('Failed to fetch cattle data')
+        if (!staffRes.ok) throw new Error('Failed to fetch staff data')
+        if (!transactionsRes.ok) throw new Error('Failed to fetch transactions data')
+        if (!milkRes.ok) throw new Error('Failed to fetch milk data')
+        
+        const [cattle, staff, transactions, milkTransactions] = await Promise.all([
           cattleRes.json(),
           staffRes.json(),
           transactionsRes.json(),
           milkRes.json()
         ])
-        // Ensure milkProductions is always an array
-        const milkArray = Array.isArray(milkProductions) ? milkProductions : [];
+        
+        // Store raw data
+        setAllCattle(Array.isArray(cattle) ? cattle : [])
+        setAllStaff(Array.isArray(staff) ? staff : [])
+        setAllTransactions(Array.isArray(transactions) ? transactions : [])
+        setAllMilkTransactions(Array.isArray(milkTransactions) ? milkTransactions : [])
+        
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+        // Set default empty state on error
+        setAllCattle([])
+        setAllStaff([])
+        setAllTransactions([])
+        setAllMilkTransactions([])
         setStats([
           {
-            title: 'Total Cattle',
-            value: cattle.length,
+            title: 'Active Cattle',
+            value: '0',
             change: '+0%',
             icon: Circle,
             gradient: 'from-blue-500 to-blue-600',
@@ -76,7 +306,7 @@ export default function Dashboard() {
           },
           {
             title: 'Milk Production',
-            value: milkArray.reduce((sum, m) => sum + (m.litres || 0), 0) + 'L',
+            value: '0L',
             change: '+0%',
             icon: Milk,
             gradient: 'from-green-500 to-green-600',
@@ -84,23 +314,14 @@ export default function Dashboard() {
           },
           {
             title: 'Active Staff',
-            value: staff.length,
+            value: '0',
             change: '+0',
             icon: Users,
             gradient: 'from-purple-500 to-purple-600',
             bgGradient: 'from-purple-50 to-purple-100'
           }
         ])
-        setRecentActivities(transactions.slice(0, 5).map(t => ({
-          type: t.category,
-          title: t.transactionName,
-          description: t.category + (t.litres ? ` - ${t.litres}L` : ''),
-          time: new Date(t.date).toLocaleDateString(),
-          icon: t.category === 'milk' ? Milk : t.category === 'sell cattle' ? Circle : t.category === 'health' ? Activity : Circle,
-          color: t.category === 'milk' ? 'green' : t.category === 'sell cattle' ? 'blue' : t.category === 'health' ? 'red' : 'blue'
-        })))
-      } catch (error) {
-        console.error('Error loading dashboard data:', error)
+        setRecentActivities([])
       } finally {
         setLoading(false)
       }
@@ -136,6 +357,69 @@ export default function Dashboard() {
         {/* Enhanced Dashboard Content */}
         <main className="relative -mt-8 sm:-mt-12 px-4 sm:px-6 pb-20">
           <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
+            
+            {/* Filter Section */}
+            <div className="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20">
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4">
+                  <select
+                    value={selectedPeriod}
+                    onChange={(e) => setSelectedPeriod(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-base font-medium"
+                  >
+                    <option value="all">All Time</option>
+                    <option value="daily">Today</option>
+                    <option value="weekly">Last 7 Days</option>
+                    <option value="monthly">This Month</option>
+                    <option value="yearly">This Year</option>
+                    <option value="custom">Custom Range</option>
+                  </select>
+
+                  {/* Custom Date Range Picker - Mobile Responsive */}
+                  {selectedPeriod === 'custom' && (
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                        <input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-300"
+                          placeholder="Start Date"
+                        />
+                      </div>
+                      <div className="hidden sm:flex items-center justify-center text-gray-500 font-medium px-2">
+                        to
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                        <input
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-300"
+                          placeholder="End Date"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
+                  <span className="font-medium text-center sm:text-left">
+                    {selectedPeriod === 'all' && 'Showing all data'}
+                    {selectedPeriod === 'daily' && 'Showing today\'s data'}
+                    {selectedPeriod === 'weekly' && 'Showing last 7 days'}
+                    {selectedPeriod === 'monthly' && 'Showing this month'}
+                    {selectedPeriod === 'yearly' && 'Showing this year'}
+                    {selectedPeriod === 'custom' && customStartDate && customEndDate && 
+                      `Showing ${new Date(customStartDate).toLocaleDateString()} to ${new Date(customEndDate).toLocaleDateString()}`
+                    }
+                    {selectedPeriod === 'custom' && (!customStartDate || !customEndDate) && 'Select date range'}
+                  </span>
+                </div>
+              </div>
+            </div>
             
             {/* Beautiful Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -189,56 +473,6 @@ export default function Dashboard() {
                   </div>
                 )
               })}
-            </div>
-
-            {/* Interactive Performance Dashboard */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-white">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold mb-2">Farm Performance Analytics</h3>
-                    <p className="text-blue-100 text-sm sm:text-base opacity-90">
-                      Real-time insights into your dairy operations
-                    </p>
-                  </div>
-                  <div className="text-center sm:text-right">
-                    <div className="text-3xl sm:text-4xl font-extrabold mb-1">92%</div>
-                    <div className="text-sm text-blue-100">Overall Efficiency</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-6 sm:p-8">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-6">
-                  {[
-                    { label: 'Milk Quality', value: '98%', color: 'from-green-500 to-emerald-500' },
-                    { label: 'Health Score', value: '94%', color: 'from-blue-500 to-cyan-500' },
-                    { label: 'Productivity', value: '89%', color: 'from-purple-500 to-pink-500' },
-                    { label: 'Efficiency', value: '92%', color: 'from-orange-500 to-red-500' }
-                  ].map((metric, index) => (
-                    <div key={index} className="text-center p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors duration-300">
-                      <div className={`w-16 h-16 mx-auto mb-3 bg-gradient-to-r ${metric.color} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
-                        {metric.value}
-                      </div>
-                      <p className="text-sm font-semibold text-gray-700">{metric.label}</p>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Progress Bar */}
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Weekly Performance</span>
-                    <span>92% Complete</span>
-                  </div>
-                  <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
-                    <div 
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: '92%' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Quick Insights Cards */}

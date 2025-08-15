@@ -27,7 +27,7 @@ import {
 
 export default function StaffManagement() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterRole, setFilterRole] = useState('all')
+
   const [filterStatus, setFilterStatus] = useState('all')
   const [showAddForm, setShowAddForm] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
@@ -44,6 +44,7 @@ export default function StaffManagement() {
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deletingStaff, setDeletingStaff] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     async function loadStaff() {
@@ -69,14 +70,10 @@ export default function StaffManagement() {
       (staff.phone && staff.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (staff.email && staff.email.toLowerCase().includes(searchTerm.toLowerCase()))
     
-    // Role filter functionality
-    const matchesRole = filterRole === 'all' || 
-      (staff.position && staff.position === filterRole)
-    
     // Status filter functionality
     const matchesStatus = filterStatus === 'all' || staff.status === filterStatus
     
-    return matchesSearch && matchesRole && matchesStatus
+    return matchesSearch && matchesStatus
   })
 
   const getStatusColor = (status) => {
@@ -119,7 +116,12 @@ export default function StaffManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (isSubmitting) return // Prevent double submission
+    
     try {
+      setIsSubmitting(true) // Start loading
+      
       await addStaff({
         name: formData.name,
         cnic: formData.cnic,
@@ -144,12 +146,19 @@ export default function StaffManagement() {
       toast.success('Staff member added successfully!')
     } catch (error) {
       toast.error('Failed to add staff member!')
+    } finally {
+      setIsSubmitting(false) // End loading
     }
   }
 
   const handleEditSubmit = async (e) => {
     e.preventDefault()
+    
+    if (isSubmitting) return // Prevent double submission
+    
     try {
+      setIsSubmitting(true) // Start loading
+      
       await editStaff(editingStaff.id, {
         name: formData.name,
         cnic: formData.cnic,
@@ -175,6 +184,8 @@ export default function StaffManagement() {
       toast.success('Staff member updated successfully!')
     } catch (error) {
       toast.error('Failed to update staff member!')
+    } finally {
+      setIsSubmitting(false) // End loading
     }
   }
 
@@ -436,20 +447,9 @@ export default function StaffManagement() {
                 {/* Filters Row */}
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <select
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
-                    className="flex-1 px-3 sm:px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base font-medium transition-all duration-300"
-                  >
-                    <option value="all">All Roles</option>
-                    {Array.from(new Set(staffData.map(s => s.position))).filter(Boolean).map(position => (
-                      <option key={position} value={position}>{position}</option>
-                    ))}
-                  </select>
-                  
-                  <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="flex-1 px-3 sm:px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base font-medium transition-all duration-300"
+                    className="w-full px-3 sm:px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base font-medium transition-all duration-300"
                   >
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
@@ -457,12 +457,6 @@ export default function StaffManagement() {
                     <option value="relieved">Relieved</option>
                     <option value="terminated">Terminated</option>
                   </select>
-                  
-                  <button className="px-4 sm:px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl hover:from-purple-700 hover:to-indigo-700 flex items-center justify-center font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 shadow-lg whitespace-nowrap">
-                    <Filter className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    <span className="hidden sm:inline">Apply Filters</span>
-                    <span className="sm:hidden">Filter</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -592,7 +586,7 @@ export default function StaffManagement() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">No staff found</h3>
                 <p className="text-base text-gray-600 mb-8 max-w-md mx-auto">
-                  {searchTerm || filterRole !== 'all' || filterStatus !== 'all'
+                  {searchTerm || filterStatus !== 'all'
                     ? 'Try adjusting your search or filters to find what you&apos;re looking for.'
                     : 'Start building your team by adding your first staff member.'
                   }
@@ -747,15 +741,43 @@ export default function StaffManagement() {
                 <button
                   type="button"
                   onClick={handleCloseForm}
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                 >
-                  Add Staff
+                  {isSubmitting ? (
+                    <>
+                      <svg 
+                        className="animate-spin h-5 w-5 text-white" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24"
+                      >
+                        <circle 
+                          className="opacity-25" 
+                          cx="12" 
+                          cy="12" 
+                          r="10" 
+                          stroke="currentColor" 
+                          strokeWidth="4"
+                        ></circle>
+                        <path 
+                          className="opacity-75" 
+                          fill="currentColor" 
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Adding Staff...
+                    </>
+                  ) : (
+                    'Add Staff'
+                  )}
                 </button>
               </div>
             </form>
@@ -888,15 +910,43 @@ export default function StaffManagement() {
                 <button
                   type="button"
                   onClick={handleCloseEditForm}
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all duration-200 font-semibold text-base sm:text-lg order-2 sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl sm:rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2"
+                  disabled={isSubmitting}
+                  className="w-full sm:flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl sm:rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                 >
-                  Update Staff
+                  {isSubmitting ? (
+                    <>
+                      <svg 
+                        className="animate-spin h-5 w-5 text-white" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24"
+                      >
+                        <circle 
+                          className="opacity-25" 
+                          cx="12" 
+                          cy="12" 
+                          r="10" 
+                          stroke="currentColor" 
+                          strokeWidth="4"
+                        ></circle>
+                        <path 
+                          className="opacity-75" 
+                          fill="currentColor" 
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Updating Staff...
+                    </>
+                  ) : (
+                    'Update Staff'
+                  )}
                 </button>
               </div>
             </form>

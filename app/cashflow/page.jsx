@@ -46,6 +46,7 @@ export default function CashFlow() {
 
   // Edit mode state
   const [editingTransaction, setEditingTransaction] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false) // Add loading state
 
   // Load data from database
   useEffect(() => {
@@ -175,7 +176,11 @@ export default function CashFlow() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    if (isSubmitting) return // Prevent double submission
+    
     try {
+      setIsSubmitting(true) // Start loading
+      
       const transactionData = {
         name: formData.name,
         type: formData.type,
@@ -231,6 +236,8 @@ export default function CashFlow() {
     } catch (error) {
       console.error('Error submitting transaction:', error)
       toast.error('Failed to save transaction')
+    } finally {
+      setIsSubmitting(false) // End loading
     }
   }
 
@@ -775,11 +782,12 @@ export default function CashFlow() {
         {showAddTransaction && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
             <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="sticky top-0 bg-white p-6 border-b border-gray-100 rounded-t-2xl">
+              <div className="sticky top-0 bg-white p-4 sm:p-6 border-b border-gray-100 rounded-t-2xl">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <DollarSign className="w-6 h-6 text-blue-500" />
-                    {editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+                    <span className="hidden sm:inline">{editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}</span>
+                    <span className="sm:hidden">{editingTransaction ? 'Edit' : 'Add'}</span>
                   </h3>
                   <button
                     onClick={() => {
@@ -793,28 +801,29 @@ export default function CashFlow() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Transaction Name
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleFormChange('name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
+                    placeholder="Enter transaction name"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Type
                   </label>
                   <select
                     value={formData.type}
                     onChange={(e) => handleFormChange('type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base bg-white"
                   >
                     <option value="income">Income</option>
                     <option value="expense">Expense</option>
@@ -822,13 +831,13 @@ export default function CashFlow() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => handleFormChange('category', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base bg-white"
                     required
                   >
                     <option value="">Select Category</option>
@@ -854,37 +863,39 @@ export default function CashFlow() {
                 {formData.category === 'milk_sales' ? (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Litres
                       </label>
                       <input
                         type="number"
                         value={formData.litres}
                         onChange={(e) => handleFormChange('litres', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
+                        placeholder="Enter litres"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Price Per Litre (PKR)
                       </label>
                       <input
                         type="number"
                         value={formData.pricePerLitre}
                         onChange={(e) => handleFormChange('pricePerLitre', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
+                        placeholder="Enter price per litre"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Session
                       </label>
                       <select
                         value={formData.session}
                         onChange={(e) => handleFormChange('session', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base bg-white"
                       >
                         <option value="morning">Morning</option>
                         <option value="evening">Evening</option>
@@ -893,14 +904,15 @@ export default function CashFlow() {
                   </>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Amount (PKR)
                     </label>
                     <input
                       type="number"
                       value={formData.amount}
                       onChange={(e) => handleFormChange('amount', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
+                      placeholder="Enter amount"
                       required
                     />
                   </div>
@@ -910,26 +922,26 @@ export default function CashFlow() {
                 {formData.category === 'cattle_purchase' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Cattle Name
                       </label>
                       <input
                         type="text"
                         value={formData.cattleName}
                         onChange={(e) => handleFormChange('cattleName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
                         placeholder="Enter cattle name"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Cattle Type
                       </label>
                       <select
                         value={formData.cattleType}
                         onChange={(e) => handleFormChange('cattleType', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base bg-white"
                         required
                       >
                         <option value="">Select Type</option>
@@ -940,14 +952,14 @@ export default function CashFlow() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Age (Years)
                       </label>
                       <input
                         type="number"
                         value={formData.cattleAge}
                         onChange={(e) => handleFormChange('cattleAge', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
                         placeholder="Enter age in years"
                         min="0"
                         max="20"
@@ -958,14 +970,14 @@ export default function CashFlow() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Date
                   </label>
                   <input
                     type="date"
                     value={formData.date}
                     onChange={(e) => handleFormChange('date', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
                     required
                   />
                 </div>
@@ -973,13 +985,13 @@ export default function CashFlow() {
                 {/* Related Cattle - only for sales, not purchases */}
                 {formData.category === 'cattle_sales' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Related Cattle
                     </label>
                     <select
                       value={formData.cattleId}
                       onChange={(e) => handleFormChange('cattleId', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base bg-white"
                     >
                       <option value="">Select Cattle</option>
                       {cattleData.filter(cattle => cattle.status === 'active').map(cattle => (
@@ -994,13 +1006,13 @@ export default function CashFlow() {
                 {/* Related Staff */}
                 {formData.category === 'staff_salary' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Staff Member
                     </label>
                     <select
                       value={formData.staffId}
                       onChange={(e) => handleFormChange('staffId', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base bg-white"
                     >
                       <option value="">Select Staff Member</option>
                       {staffMembers.map(staff => (
@@ -1013,24 +1025,51 @@ export default function CashFlow() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Description (Optional)
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => handleFormChange('description', e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base resize-none"
                     placeholder="Additional details..."
                   />
                 </div>
 
-                <div className="flex gap-4 pt-6">
+                <div className="flex flex-col gap-3 pt-6">
                   <button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                   >
-                    {editingTransaction ? 'Update Transaction' : 'Add Transaction'}
+                    {isSubmitting ? (
+                      <>
+                        <svg 
+                          className="animate-spin h-5 w-5 text-white" 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          fill="none" 
+                          viewBox="0 0 24 24"
+                        >
+                          <circle 
+                            className="opacity-25" 
+                            cx="12" 
+                            cy="12" 
+                            r="10" 
+                            stroke="currentColor" 
+                            strokeWidth="4"
+                          ></circle>
+                          <path 
+                            className="opacity-75" 
+                            fill="currentColor" 
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        {editingTransaction ? 'Updating Transaction...' : 'Adding Transaction...'}
+                      </>
+                    ) : (
+                      editingTransaction ? 'Update Transaction' : 'Add Transaction'
+                    )}
                   </button>
                   <button
                     type="button"
@@ -1038,7 +1077,8 @@ export default function CashFlow() {
                       setShowAddTransaction(false)
                       setEditingTransaction(null)
                     }}
-                    className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 font-semibold transition-all duration-200"
+                    disabled={isSubmitting}
+                    className="w-full bg-gray-100 text-gray-700 py-4 px-6 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 font-semibold transition-all duration-200 text-base disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
