@@ -185,18 +185,26 @@ export default function CattleManagement() {
     
     try {
       // Import deleteCattle function and call it
-      await import('../../lib/actions').then(({ deleteCattle }) =>
+      const result = await import('../../lib/actions').then(({ deleteCattle }) =>
         deleteCattle(deletingCattle.id)
       )
+      
       // Reload cattle data
       const cattle = await getCattle()
       setCattleData(cattle)
       setShowDeleteConfirm(false)
       setDeletingCattle(null)
-      toast.success('Cattle deleted successfully!')
+      
+      // Show appropriate success message based on the result
+      if (result.message) {
+        toast.success(result.message)
+      } else {
+        toast.success('Cattle deleted successfully!')
+      }
     } catch (error) {
-      toast.error('Failed to delete cattle!')
+      toast.error(error.message || 'Failed to delete cattle!')
       console.error('Delete error:', error)
+      // Keep modal open on error so user can try again or cancel
     }
   }
 

@@ -8,7 +8,7 @@ import { addTransaction, getCattle, getTransactions, getStaff, updateTransaction
 
 export default function CashFlow() {
   const [activeTab, setActiveTab] = useState('overview')
-  const [selectedPeriod, setSelectedPeriod] = useState('month')
+  const [selectedPeriod, setSelectedPeriod] = useState('all')
   const [showAddTransaction, setShowAddTransaction] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
@@ -84,17 +84,70 @@ export default function CashFlow() {
     }
   }
 
-  // Calculate totals
-  const totalIncome = transactions
+  // Filter transactions based on selected time period
+  const getFilteredTransactionsByPeriod = () => {
+    if (selectedPeriod === 'all') {
+      return transactions; // Return all transactions for "All Time"
+    }
+    
+    const now = new Date();
+    let startDate;
+    
+    switch (selectedPeriod) {
+      case 'weekly':
+        // Get start of current week (Sunday)
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - now.getDay());
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'monthly':
+        // Get start of current month
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'yearly':
+        // Get start of current year
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        return transactions;
+    }
+    
+    return transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= now;
+    });
+  };
+
+  // Get filtered transactions for the selected period
+  const periodFilteredTransactions = getFilteredTransactionsByPeriod();
+
+  // Calculate totals based on filtered transactions
+  const totalIncome = periodFilteredTransactions
     .filter(tx => tx.type === 'income')
     .reduce((sum, tx) => sum + Number(tx.amount), 0);
 
-  const totalExpenses = transactions
+  const totalExpenses = periodFilteredTransactions
     .filter(tx => tx.type === 'expense')
     .reduce((sum, tx) => sum + Number(tx.amount), 0);
 
   const netProfit = totalIncome - totalExpenses;
   const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(2) : 0;
+
+  // Helper function to get period display name
+  const getPeriodDisplayName = () => {
+    switch (selectedPeriod) {
+      case 'weekly':
+        return 'This Week';
+      case 'monthly':
+        return 'This Month';
+      case 'yearly':
+        return 'This Year';
+      case 'all':
+        return 'All Time';
+      default:
+        return 'All Time';
+    }
+  };
 
   // Safe formatting function to prevent hydration errors
   const safeFormatPKRCompact = (amount) => {
@@ -195,7 +248,11 @@ export default function CashFlow() {
       session: transaction.details?.session || 'morning',
       cattleId: transaction.cattleId || '',
       staffId: transaction.staffId || '',
-      description: transaction.details?.description || ''
+      description: transaction.details?.description || '',
+      // Cattle-specific fields for purchases - stored in details.cattleDetails
+      cattleName: transaction.details?.cattleDetails?.name || '',
+      cattleType: transaction.details?.cattleDetails?.type || '',
+      cattleAge: transaction.details?.cattleDetails?.age?.toString() || ''
     })
     setShowAddTransaction(true)
   }
@@ -275,116 +332,147 @@ export default function CashFlow() {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cash Flow Management</h1>
             <p className="text-gray-600 mt-1 text-sm sm:text-base">Track income, expenses and financial performance</p>
           </div>
-          <button
-            onClick={() => {
-              setShowAddTransaction(true)
-              setEditingTransaction(null)
-              setFormData({
-                name: '',
-                type: 'income',
-                category: '',
-                amount: '',
-                date: new Date().toISOString().split('T')[0],
-                litres: '',
-                pricePerLitre: '',
-                session: 'morning',
-                cattleId: '',
-                staffId: '',
-                description: '',
-                cattleName: '',
-                cattleType: '',
-                cattleAge: ''
-              })
-            }}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <DollarSign className="w-4 h-4" />
-            <span className="sm:inline">Add Transaction</span>
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            {/* Period Filter */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Period:</label>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
+                className="px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white min-w-[120px]"
+              >
+                <option value="all">All Time</option>
+                <option value="weekly">This Week</option>
+                <option value="monthly">This Month</option>
+                <option value="yearly">This Year</option>
+              </select>
+            </div>
+            <button
+              onClick={() => {
+                setShowAddTransaction(true)
+                setEditingTransaction(null)
+                setFormData({
+                  name: '',
+                  type: 'income',
+                  category: '',
+                  amount: '',
+                  date: new Date().toISOString().split('T')[0],
+                  litres: '',
+                  pricePerLitre: '',
+                  session: 'morning',
+                  cattleId: '',
+                  staffId: '',
+                  description: '',
+                  cattleName: '',
+                  cattleType: '',
+                  cattleAge: ''
+                })
+              }}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2 w-full sm:w-auto shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <DollarSign className="w-5 h-5" />
+              <span>Add Transaction</span>
+            </button>
+          </div>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm">Total Income</p>
-                <p className="text-lg sm:text-2xl font-bold text-green-600">{safeFormatPKRCompact(totalIncome)}</p>
+                <p className="text-green-100 text-sm font-medium">Total Income</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-2">{safeFormatPKRCompact(totalIncome)}</p>
+                <p className="text-green-100 text-xs mt-1">↗ {getPeriodDisplayName()}</p>
               </div>
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
+              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border">
+          <div className="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-xl shadow-lg text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm">Total Expenses</p>
-                <p className="text-lg sm:text-2xl font-bold text-red-600">{safeFormatPKRCompact(totalExpenses)}</p>
+                <p className="text-red-100 text-sm font-medium">Total Expenses</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-2">{safeFormatPKRCompact(totalExpenses)}</p>
+                <p className="text-red-100 text-xs mt-1">↙ {getPeriodDisplayName()}</p>
               </div>
-              <TrendingDown className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
+              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                <TrendingDown className="w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border col-span-2 lg:col-span-1">
+          <div className={`bg-gradient-to-br ${netProfit >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600'} p-6 rounded-xl shadow-lg text-white`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm">Net Profit</p>
-                <p className={`text-lg sm:text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {safeFormatPKRCompact(netProfit)}
+                <p className={`${netProfit >= 0 ? 'text-blue-100' : 'text-orange-100'} text-sm font-medium`}>Net Profit</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-2">{safeFormatPKRCompact(netProfit)}</p>
+                <p className={`${netProfit >= 0 ? 'text-blue-100' : 'text-orange-100'} text-xs mt-1`}>
+                  {netProfit >= 0 ? '↗' : '↙'} {getPeriodDisplayName()}
                 </p>
               </div>
-              <Target className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                <Target className="w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow border col-span-2 lg:col-span-1">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm">Profit Margin</p>
-                <p className={`text-lg sm:text-2xl font-bold ${profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {profitMargin}%
-                </p>
+                <p className="text-purple-100 text-sm font-medium">Profit Margin</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-2">{profitMargin}%</p>
+                <p className="text-purple-100 text-xs mt-1">📊 {getPeriodDisplayName()}</p>
               </div>
-              <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
+              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Transactions Table */}
-        <div className="bg-white rounded-lg shadow border">
-          <div className="p-4 sm:p-6 border-b">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
             <div className="flex flex-col gap-4">
-              <div>
-                <h2 className="text-lg sm:text-xl font-semibold">Recent Transactions</h2>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <p className="text-xs sm:text-sm text-gray-500">
-                    Sorted by most recent first • {totalTransactions} total transactions
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <BarChart3 className="w-6 h-6 text-blue-500" />
+                    Recent Transactions
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Sorted by most recent first • {totalTransactions} total transactions • Showing {getPeriodDisplayName()}
                   </p>
-                  {totalTransactions > 0 && (
-                    <p className="text-xs sm:text-sm text-gray-500">
+                </div>
+                {totalTransactions > 0 && (
+                  <div className="bg-blue-50 px-3 py-2 rounded-lg">
+                    <p className="text-sm text-blue-700 font-medium">
                       Showing {startIndex + 1}-{Math.min(endIndex, totalTransactions)} of {totalTransactions}
                     </p>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
               
-              {/* Mobile-first filters */}
+              {/* Enhanced Mobile-first filters */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                  <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search transactions..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
                   />
                 </div>
                 <div className="flex gap-3 sm:gap-4">
                   <select
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
-                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="flex-1 sm:flex-none px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white"
                   >
                     <option value="all">All Types</option>
                     <option value="income">Income</option>
@@ -393,7 +481,7 @@ export default function CashFlow() {
                   <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="flex-1 sm:flex-none px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white"
                   >
                     <option value="all">All Categories</option>
                     {categories.map(category => (
@@ -410,23 +498,34 @@ export default function CashFlow() {
             <table className="w-full hidden sm:table">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left p-4 font-medium text-gray-700">Date</th>
-                  <th className="text-left p-4 font-medium text-gray-700">Name</th>
-                  <th className="text-left p-4 font-medium text-gray-700">Type</th>
-                  <th className="text-left p-4 font-medium text-gray-700">Category</th>
-                  <th className="text-left p-4 font-medium text-gray-700">Amount</th>
-                  <th className="text-left p-4 font-medium text-gray-700">Related</th>
-                  <th className="text-left p-4 font-medium text-gray-700">Actions</th>
+                  <th className="text-left p-4 font-semibold text-gray-700 text-sm">Date</th>
+                  <th className="text-left p-4 font-semibold text-gray-700 text-sm">Name</th>
+                  <th className="text-left p-4 font-semibold text-gray-700 text-sm">Type</th>
+                  <th className="text-left p-4 font-semibold text-gray-700 text-sm">Category</th>
+                  <th className="text-left p-4 font-semibold text-gray-700 text-sm">Amount</th>
+                  <th className="text-left p-4 font-semibold text-gray-700 text-sm">Related</th>
+                  <th className="text-left p-4 font-semibold text-gray-700 text-sm">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="text-center p-8 text-gray-500">Loading...</td>
+                    <td colSpan="7" className="text-center p-12 text-gray-500">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        <p>Loading transactions...</p>
+                      </div>
+                    </td>
                   </tr>
                 ) : paginatedTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center p-8 text-gray-500">No transactions found</td>
+                    <td colSpan="7" className="text-center p-12 text-gray-500">
+                      <div className="flex flex-col items-center gap-3">
+                        <BarChart3 className="w-12 h-12 text-gray-300" />
+                        <p>No transactions found</p>
+                        <p className="text-sm">Try adjusting your search or filters</p>
+                      </div>
+                    </td>
                   </tr>
                 ) : (
                   paginatedTransactions.map((transaction, index) => {
@@ -439,9 +538,9 @@ export default function CashFlow() {
                     return (
                       <tr 
                         key={transaction.id} 
-                        className={`border-b hover:bg-gray-50 ${
+                        className={`border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150 ${
                           isToday ? 'bg-blue-50 border-blue-200' : 
-                          isRecent ? 'bg-gray-50' : ''
+                          isRecent ? 'bg-gray-25' : ''
                         }`}
                       >
                         <td className="p-4">
@@ -450,7 +549,7 @@ export default function CashFlow() {
                               <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                             )}
                             <div className={isToday ? 'font-medium text-blue-700' : ''}>
-                              <div>{transactionDate.toLocaleDateString()}</div>
+                              <div className="font-medium">{transactionDate.toLocaleDateString()}</div>
                               {getRelativeTime(transaction.date) && (
                                 <div className="text-xs text-gray-500">
                                   {getRelativeTime(transaction.date)}
@@ -459,36 +558,44 @@ export default function CashFlow() {
                             </div>
                           </div>
                         </td>
-                      <td className="p-4 font-medium">{transaction.name}</td>
+                      <td className="p-4 font-semibold text-gray-900">{transaction.name}</td>
                       <td className="p-4">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           transaction.type === 'income' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                            : 'bg-red-100 text-red-800 border border-red-200'
                         }`}>
                           {transaction.type}
                         </span>
                       </td>
-                      <td className="p-4">{transaction.category}</td>
-                      <td className="p-4 font-medium">
+                      <td className="p-4">
+                        <span className="text-sm text-gray-600 font-medium">
+                          {transaction.category}
+                        </span>
+                      </td>
+                      <td className="p-4 font-bold">
                         <span className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
                           {safeFormatPKR(transaction.amount)}
                         </span>
                       </td>
                       <td className="p-4">
-                        {transaction.cattle?.name || transaction.staff?.name || '-'}
+                        <span className="text-sm text-gray-600">
+                          {transaction.cattle?.name || transaction.staff?.name || '-'}
+                        </span>
                       </td>
                       <td className="p-4">
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleEdit(transaction)}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-lg transition-colors duration-150"
+                            title="Edit transaction"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(transaction.id)}
-                            className="text-red-600 hover:text-red-800"
+                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                            title="Delete transaction"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -504,11 +611,22 @@ export default function CashFlow() {
             {/* Mobile Card View */}
             <div className="sm:hidden">
               {loading ? (
-                <div className="text-center p-8 text-gray-500">Loading...</div>
+                <div className="text-center p-12 text-gray-500">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <p>Loading transactions...</p>
+                  </div>
+                </div>
               ) : paginatedTransactions.length === 0 ? (
-                <div className="text-center p-8 text-gray-500">No transactions found</div>
+                <div className="text-center p-12 text-gray-500">
+                  <div className="flex flex-col items-center gap-3">
+                    <BarChart3 className="w-12 h-12 text-gray-300" />
+                    <p>No transactions found</p>
+                    <p className="text-sm">Try adjusting your search or filters</p>
+                  </div>
+                </div>
               ) : (
-                <div className="space-y-3 p-4">
+                <div className="space-y-4 p-4">
                   {paginatedTransactions.map((transaction) => {
                     const transactionDate = new Date(transaction.date);
                     const now = new Date();
@@ -519,27 +637,27 @@ export default function CashFlow() {
                     return (
                       <div 
                         key={transaction.id}
-                        className={`bg-white border rounded-lg p-4 ${
+                        className={`bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 ${
                           isToday ? 'border-blue-200 bg-blue-50' : 
                           isRecent ? 'border-gray-200' : 'border-gray-100'
                         }`}
                       >
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-2">
                               {isToday && (
                                 <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                               )}
-                              <h3 className={`font-medium text-sm ${isToday ? 'text-blue-700' : 'text-gray-900'}`}>
+                              <h3 className={`font-semibold text-base ${isToday ? 'text-blue-700' : 'text-gray-900'}`}>
                                 {transaction.name}
                               </h3>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
                               <span>{transactionDate.toLocaleDateString()}</span>
                               {getRelativeTime(transaction.date) && (
                                 <>
                                   <span>•</span>
-                                  <span>{getRelativeTime(transaction.date)}</span>
+                                  <span className="text-blue-600 font-medium">{getRelativeTime(transaction.date)}</span>
                                 </>
                               )}
                             </div>
@@ -547,13 +665,13 @@ export default function CashFlow() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleEdit(transaction)}
-                              className="text-blue-600 hover:text-blue-800 p-1"
+                              className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-lg transition-colors duration-150"
                             >
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(transaction.id)}
-                              className="text-red-600 hover:text-red-800 p-1"
+                              className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors duration-150"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -561,25 +679,25 @@ export default function CashFlow() {
                         </div>
                         
                         <div className="flex justify-between items-center">
-                          <div className="flex flex-col gap-1">
+                          <div className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                 transaction.type === 'income' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-green-100 text-green-800 border border-green-200' 
+                                  : 'bg-red-100 text-red-800 border border-red-200'
                               }`}>
                                 {transaction.type}
                               </span>
-                              <span className="text-xs text-gray-600">{transaction.category}</span>
+                              <span className="text-sm text-gray-600 font-medium">{transaction.category}</span>
                             </div>
                             {(transaction.cattle?.name || transaction.staff?.name) && (
-                              <div className="text-xs text-gray-500">
-                                Related: {transaction.cattle?.name || transaction.staff?.name}
+                              <div className="text-sm text-gray-500">
+                                <span className="font-medium">Related:</span> {transaction.cattle?.name || transaction.staff?.name}
                               </div>
                             )}
                           </div>
                           <div className="text-right">
-                            <span className={`font-bold text-lg ${
+                            <span className={`font-bold text-xl ${
                               transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                             }`}>
                               {safeFormatPKRCompact(transaction.amount)}
@@ -595,12 +713,12 @@ export default function CashFlow() {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 px-4 pb-4">
+              <div className="flex items-center justify-between mt-6 px-6 pb-6">
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
                   >
                     Previous
                   </button>
@@ -617,9 +735,9 @@ export default function CashFlow() {
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
-                            className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 ${
                               currentPage === page
-                                ? 'bg-blue-600 text-white'
+                                ? 'bg-blue-600 text-white shadow-lg'
                                 : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
                             }`}
                           >
@@ -630,7 +748,7 @@ export default function CashFlow() {
                         (page === currentPage - 2 && currentPage > 3) ||
                         (page === currentPage + 2 && currentPage < totalPages - 2)
                       ) {
-                        return <span key={page} className="px-2 text-gray-500">...</span>;
+                        return <span key={page} className="px-2 text-gray-400">...</span>;
                       }
                       return null;
                     })}
@@ -639,13 +757,13 @@ export default function CashFlow() {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
                   >
                     Next
                   </button>
                 </div>
                 
-                <div className="text-sm text-gray-700">
+                <div className="text-sm text-gray-600 font-medium">
                   Page {currentPage} of {totalPages}
                 </div>
               </div>
@@ -656,10 +774,11 @@ export default function CashFlow() {
         {/* Add/Edit Transaction Modal */}
         {showAddTransaction && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
-            <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="sticky top-0 bg-white p-4 sm:p-6 border-b">
+            <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="sticky top-0 bg-white p-6 border-b border-gray-100 rounded-t-2xl">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <DollarSign className="w-6 h-6 text-blue-500" />
                     {editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}
                   </h3>
                   <button
@@ -667,14 +786,14 @@ export default function CashFlow() {
                       setShowAddTransaction(false)
                       setEditingTransaction(null)
                     }}
-                    className="text-gray-500 hover:text-gray-700 p-1"
+                    className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-150"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
+              <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Transaction Name
@@ -906,10 +1025,10 @@ export default function CashFlow() {
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-4 pt-6">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
                     {editingTransaction ? 'Update Transaction' : 'Add Transaction'}
                   </button>
@@ -919,7 +1038,7 @@ export default function CashFlow() {
                       setShowAddTransaction(false)
                       setEditingTransaction(null)
                     }}
-                    className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm sm:text-base"
+                    className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 font-semibold transition-all duration-200"
                   >
                     Cancel
                   </button>
