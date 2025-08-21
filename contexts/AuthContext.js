@@ -21,17 +21,25 @@ export function AuthProvider({ children }) {
         method: 'GET',
         credentials: 'include',
       });
-
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Auth check success - user authenticated:', data.user.username);
         setUser(data.user);
         setIsAuthenticated(true);
+      } else if (response.status === 401) {
+        // 401 is expected when not authenticated - not an error
+        console.log('User not authenticated (no valid token)');
+        setUser(null);
+        setIsAuthenticated(false);
       } else {
+        // Other status codes are actual errors
+        console.error('Auth check failed with status:', response.status);
         setUser(null);
         setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error('Auth check error:', error);
+      console.error('Auth check network error:', error);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -41,6 +49,7 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     try {
+      console.log('AuthContext login started for:', username);
       setLoading(true);
       
       const response = await fetch('/api/auth/login', {
@@ -53,18 +62,36 @@ export function AuthProvider({ children }) {
       });
 
       const data = await response.json();
+      console.log('Login API response:', { status: response.status, data });
 
       if (response.ok) {
+        console.log('Setting user state:', data.user);
         setUser(data.user);
         setIsAuthenticated(true);
         toast.success(data.message || 'Login successful!');
+        
+        // Force re-check auth status to ensure state is properly updated
+        setTimeout(() => {
+          console.log('Re-checking auth status after login...');
+          console.log('All document cookies:', document.cookie);
+          
+          // Check if auth-token is in document.cookie
+          const authToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('auth-token='));
+          console.log('Auth token from document.cookie:', authToken);
+          
+          checkAuthStatus();
+        }, 200); // Increased delay
+        
         return { success: true, user: data.user };
       } else {
+        console.log('Login failed:', data.error);
         toast.error(data.error || 'Login failed');
         return { success: false, error: data.error };
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login network error:', error);
       toast.error('Network error. Please try again.');
       return { success: false, error: 'Network error' };
     } finally {

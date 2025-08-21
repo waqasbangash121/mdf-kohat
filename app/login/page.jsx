@@ -38,13 +38,28 @@ export default function LoginPage() {
     
     setIsSubmitting(true);
     
-    const result = await login(formData.username, formData.password);
-    
-    if (result.success) {
-      router.push('/');
+    try {
+      console.log('Login attempt started with:', formData.username);
+      const result = await login(formData.username, formData.password);
+      
+      console.log('Login result:', result);
+      
+      if (result.success) {
+        console.log('Login successful, preparing redirect...');
+        // Add a longer delay to ensure cookie is properly set
+        setTimeout(() => {
+          console.log('Executing redirect to dashboard...');
+          // Force a hard redirect to ensure middleware processes the request
+          window.location.href = '/';
+        }, 500); // Increased delay to 500ms
+      } else {
+        console.error('Login failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   const togglePasswordVisibility = () => {

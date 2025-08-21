@@ -8,14 +8,16 @@ export async function POST() {
     });
 
     // Clear the auth token cookie
-    response.cookies.set('auth-token', '', {
-      httpOnly: true,
-      secure: true, // Always use HTTPS in production
-      sameSite: 'strict',
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: false, // Match login cookie settings
+      secure: false, // Disable secure for localhost testing
+      sameSite: 'lax', // Use lax for localhost compatibility
       maxAge: 0,
-      path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : undefined
-    });
+      path: '/'
+    };
+    
+    response.cookies.set('auth-token', '', cookieOptions);
 
     return response;
   } catch (error) {
