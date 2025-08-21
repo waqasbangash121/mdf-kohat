@@ -1,12 +1,13 @@
 [build]
   publish = ".next"
-  command = "npm run build"
+  command = "npm install && npm run build"
+
+[build.environment]
+  NPM_FLAGS = "--version"
+  NODE_VERSION = "18"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[build.environment]
-  NPM_FLAGS = "--version" # Ensure npm is available
 
 # Netlify Functions configuration for API routes
 [[headers]]
