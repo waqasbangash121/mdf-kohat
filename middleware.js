@@ -33,7 +33,7 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   
   // Public paths that don't require authentication
-  const publicPaths = ['/login', '/setup', '/api/auth'];
+  const publicPaths = ['/login', '/setup', '/api/auth', '/images', '/favicon.ico', '/_next'];
   
   // Check if the current path is public
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
@@ -92,9 +92,10 @@ export const config = {
      * - api/auth (authentication routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
+     * - images (public images)
      * - favicon.ico (favicon file)
      * - public folder files
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!api/auth|_next/static|_next/image|images|favicon.ico|.*\\..*).*)',
   ],
 };
