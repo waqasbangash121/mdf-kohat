@@ -16,11 +16,29 @@ export default function LoginPage() {
   const { login, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
-  // Redirect if already authenticated
+  // Check if setup is needed and redirect if already authenticated
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      router.push('/');
-    }
+    const checkSetupAndAuth = async () => {
+      // First check if setup is needed
+      try {
+        const response = await fetch('/api/auth/setup-status');
+        const data = await response.json();
+        
+        if (data.needsSetup) {
+          router.push('/setup');
+          return;
+        }
+      } catch (error) {
+        console.error('Setup status check error:', error);
+      }
+
+      // Then check authentication
+      if (!loading && isAuthenticated) {
+        router.push('/');
+      }
+    };
+
+    checkSetupAndAuth();
   }, [isAuthenticated, loading, router]);
 
   const handleInputChange = (e) => {

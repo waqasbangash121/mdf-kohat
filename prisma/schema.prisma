@@ -14,7 +14,7 @@ model User {
   username  String   @unique
   email     String   @unique
   password  String   // Hashed password
-  name      String
+  name      String?
   role      UserRole @default(ADMIN)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

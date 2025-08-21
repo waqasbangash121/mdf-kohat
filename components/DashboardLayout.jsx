@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 // import { Cow } from 'lucide-react'; // Commenting out Cow import
-import { Circle, Milk, Users, BarChart, DollarSign, LogOut, User } from 'lucide-react';
+import { Circle, Milk, Users, BarChart, DollarSign, LogOut, User, Settings } from 'lucide-react';
 
 export default function DashboardLayout({ children, title }) {
   const router = useRouter()
@@ -60,6 +60,14 @@ export default function DashboardLayout({ children, title }) {
               <User className="w-4 h-4" />
               <span>Welcome, {user?.name || user?.username || 'User'}</span>
             </div>
+            <button
+              onClick={() => router.push('/settings')}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </button>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
