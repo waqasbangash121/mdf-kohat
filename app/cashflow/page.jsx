@@ -41,7 +41,8 @@ export default function CashFlow() {
     // Cattle-specific fields for purchases
     cattleName: '',
     cattleType: '',
-    cattleAge: ''
+    cattleAge: '',
+    marketPrice: ''
   })
 
   // Edit mode state
@@ -197,7 +198,8 @@ export default function CashFlow() {
         // Cattle-specific fields for purchases
         cattleName: formData.cattleName,
         cattleType: formData.cattleType,
-        cattleAge: formData.cattleAge
+        cattleAge: formData.cattleAge,
+        marketPrice: formData.marketPrice
       }
 
       console.log('Submitting transaction data:', transactionData)
@@ -227,7 +229,8 @@ export default function CashFlow() {
         description: '',
         cattleName: '',
         cattleType: '',
-        cattleAge: ''
+        cattleAge: '',
+        marketPrice: ''
       })
       setShowAddTransaction(false)
       
@@ -259,7 +262,8 @@ export default function CashFlow() {
       // Cattle-specific fields for purchases - stored in details.cattleDetails
       cattleName: transaction.details?.cattleDetails?.name || '',
       cattleType: transaction.details?.cattleDetails?.type || '',
-      cattleAge: transaction.details?.cattleDetails?.age?.toString() || ''
+      cattleAge: transaction.details?.cattleDetails?.age?.toString() || '',
+      marketPrice: transaction.details?.cattleDetails?.marketPrice?.toString() || ''
     })
     setShowAddTransaction(true)
   }
@@ -372,7 +376,8 @@ export default function CashFlow() {
                   description: '',
                   cattleName: '',
                   cattleType: '',
-                  cattleAge: ''
+                  cattleAge: '',
+                  marketPrice: ''
                 })
               }}
               className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2 w-full sm:w-auto shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -581,13 +586,25 @@ export default function CashFlow() {
                         </span>
                       </td>
                       <td className="p-4 font-bold">
-                        <span className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
-                          {safeFormatPKR(transaction.amount)}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
+                            {safeFormatPKR(transaction.amount)}
+                          </span>
+                          {transaction.category === 'cattle_purchase' && transaction.details?.cattleDetails?.marketPrice && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Purchase Price
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4">
                         <span className="text-sm text-gray-600">
                           {transaction.cattle?.name || transaction.staff?.name || '-'}
+                          {transaction.category === 'cattle_purchase' && transaction.details?.cattleDetails?.marketPrice && (
+                            <div className="text-xs text-green-600 font-medium mt-1">
+                              Market: {safeFormatPKRCompact(transaction.details.cattleDetails.marketPrice)}
+                            </div>
+                          )}
                         </span>
                       </td>
                       <td className="p-4">
@@ -700,6 +717,11 @@ export default function CashFlow() {
                             {(transaction.cattle?.name || transaction.staff?.name) && (
                               <div className="text-sm text-gray-500">
                                 <span className="font-medium">Related:</span> {transaction.cattle?.name || transaction.staff?.name}
+                                {transaction.category === 'cattle_purchase' && transaction.details?.cattleDetails?.marketPrice && (
+                                  <div className="text-xs text-green-600 font-medium mt-1">
+                                    Market Price: {safeFormatPKRCompact(transaction.details.cattleDetails.marketPrice)}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -709,6 +731,11 @@ export default function CashFlow() {
                             }`}>
                               {safeFormatPKRCompact(transaction.amount)}
                             </span>
+                            {transaction.category === 'cattle_purchase' && transaction.details?.cattleDetails?.marketPrice && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Purchase Price
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -965,6 +992,22 @@ export default function CashFlow() {
                         max="20"
                         required
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Market Price (PKR) - Optional
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.marketPrice}
+                        onChange={(e) => handleFormChange('marketPrice', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
+                        placeholder="Enter current market price"
+                        min="0"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Current market value for tracking investment performance
+                      </p>
                     </div>
                   </>
                 )}

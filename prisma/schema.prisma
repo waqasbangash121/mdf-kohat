@@ -9,12 +9,27 @@ datasource db {
 }
 
 // Core entities with simplified relationships
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  password  String   // Hashed password
+  name      String
+  role      UserRole @default(ADMIN)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
 model Cattle {
   id          String   @id @default(cuid())
   name        String
   type        String   // Bull, Cow, Buffalo, etc.
   age         Int
   purchasePrice Int
+  marketPrice   Int?     // Current market value of the cattle (optional)
   purchaseDate  DateTime
   status      CattleStatus @default(active)
   createdAt   DateTime @default(now())
@@ -81,4 +96,10 @@ enum CattleStatus {
 enum StaffStatus {
   active
   terminated
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
 }

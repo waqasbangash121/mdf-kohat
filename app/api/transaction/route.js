@@ -45,15 +45,22 @@ export async function POST(req) {
 
       // If this is a cattle purchase, create the cattle first
       if (data.category === 'cattle_purchase' && data.cattleName) {
+        const cattleData = {
+          name: data.cattleName,
+          type: data.cattleType,
+          age: parseInt(data.cattleAge),
+          purchasePrice: amount,
+          purchaseDate: new Date(data.date),
+          status: 'active'
+        };
+        
+        // Add market price if provided
+        if (data.marketPrice && data.marketPrice !== '' && data.marketPrice !== null) {
+          cattleData.marketPrice = parseInt(data.marketPrice);
+        }
+        
         const newCattle = await tx.cattle.create({
-          data: {
-            name: data.cattleName,
-            type: data.cattleType,
-            age: parseInt(data.cattleAge),
-            purchasePrice: amount,
-            purchaseDate: new Date(data.date),
-            status: 'active'
-          }
+          data: cattleData
         });
         cattleId = newCattle.id;
         
@@ -61,7 +68,10 @@ export async function POST(req) {
         details.cattleDetails = {
           name: data.cattleName,
           type: data.cattleType,
-          age: parseInt(data.cattleAge)
+          age: parseInt(data.cattleAge),
+          ...(data.marketPrice && data.marketPrice !== '' && data.marketPrice !== null && {
+            marketPrice: parseInt(data.marketPrice)
+          })
         };
       }
 

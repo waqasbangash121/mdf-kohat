@@ -41,6 +41,7 @@ export default function CattleManagement() {
         name: formData.name,
         type: formData.type,
         purchasePrice: formData.price ? parseInt(formData.price) : 0,
+        marketPrice: formData.marketPrice ? parseInt(formData.marketPrice) : null,
         age: formData.age ? parseInt(formData.age) : 0,
         purchaseDate: formData.dateAdded ? new Date(formData.dateAdded).toISOString() : new Date().toISOString()
       }
@@ -50,7 +51,7 @@ export default function CattleManagement() {
       // Reload cattle data
       const cattle = await import('../../lib/actions').then(({ getCattle }) => getCattle())
       setCattleData(cattle)
-      setFormData({ name: '', type: '', price: '', age: '', dateAdded: '' })
+      setFormData({ name: '', type: '', price: '', marketPrice: '', age: '', dateAdded: '' })
       setShowAddForm(false)
       toast.success('Cattle added successfully!')
     } catch (error) {
@@ -69,6 +70,7 @@ export default function CattleManagement() {
     name: '',
     type: '',
     price: '',
+    marketPrice: '',
     age: '',
     dateAdded: ''
   })
@@ -150,12 +152,13 @@ export default function CattleManagement() {
         type: formData.type,
         age: formData.age ? parseInt(formData.age) : 0,
         price: formData.price ? parseInt(formData.price) : 0,
+        marketPrice: formData.marketPrice ? parseInt(formData.marketPrice) : null,
         date: formData.dateAdded ? new Date(formData.dateAdded).toISOString() : new Date().toISOString()
       }
       await editCattle(editingCattle.id, cattleDataToUpdate)
       const cattle = await getCattle()
       setCattleData(cattle)
-      setFormData({ name: '', type: '', price: '', age: '', dateAdded: '' })
+      setFormData({ name: '', type: '', price: '', marketPrice: '', age: '', dateAdded: '' })
       setShowEditForm(false)
       setEditingCattle(null)
       toast.success('Cattle updated successfully!')
@@ -171,6 +174,7 @@ export default function CattleManagement() {
       name: '',
       type: '',
       price: '',
+      marketPrice: '',
       age: '',
       dateAdded: ''
     })
@@ -184,6 +188,7 @@ export default function CattleManagement() {
         name: cattle.name,
         type: cattle.type,
         price: cattle.purchasePrice ? cattle.purchasePrice.toString() : '',
+        marketPrice: cattle.marketPrice ? cattle.marketPrice.toString() : '',
         age: cattle.age ? cattle.age.toString() : '',
   dateAdded: cattle.purchaseDate ? new Date(cattle.purchaseDate).toISOString().slice(0,10) : ''
       })
@@ -258,17 +263,70 @@ export default function CattleManagement() {
                 <p className="text-lg sm:text-xl text-green-100 mb-4">
                   Monitor and manage your livestock with advanced tracking
                 </p>
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-4">
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mt-4">
                   <div className="flex items-center text-white/90 bg-white/20 rounded-full px-4 py-2">
                     <Circle className="w-5 h-5 mr-2 text-green-200" />
                     <span className="font-semibold">{cattleData.filter(cattle => cattle.status !== 'sold').length} Active Cattle</span>
                   </div>
-                  <div className="flex items-center text-white/90 bg-white/20 rounded-full px-4 py-2">
-                    <DollarSign className="w-5 h-5 mr-2 text-green-200" />
-                    <span className="font-semibold">₨{cattleData.filter(cattle => cattle.status !== 'sold').reduce((sum, c) => sum + (c.purchasePrice || 0), 0).toLocaleString()}</span>
+                  <div className="flex items-center text-white/90 bg-white/20 rounded-full px-3 py-2">
+                    <DollarSign className="w-4 h-4 mr-2 text-blue-200" />
+                    <div className="flex flex-col text-center">
+                      <span className="font-semibold text-xs">Purchase Asset</span>
+                      <span className="font-bold text-sm">₨{cattleData.filter(cattle => cattle.status !== 'sold').reduce((sum, c) => sum + (c.purchasePrice || 0), 0).toLocaleString()}</span>
+                    </div>
                   </div>
+                  <div className="flex items-center text-white/90 bg-white/20 rounded-full px-3 py-2">
+                    <TrendingUp className="w-4 h-4 mr-2 text-green-200" />
+                    <div className="flex flex-col text-center">
+                      <span className="font-semibold text-xs">Market Value</span>
+                      <span className="font-bold text-sm">₨{cattleData.filter(cattle => cattle.status !== 'sold').reduce((sum, c) => sum + (c.marketPrice || 0), 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+                  {(() => {
+                    const activeCattle = cattleData.filter(cattle => cattle.status !== 'sold');
+                    const purchaseTotal = activeCattle.reduce((sum, c) => sum + (c.purchasePrice || 0), 0);
+                    const marketTotal = activeCattle.reduce((sum, c) => sum + (c.marketPrice || 0), 0);
+                    const difference = marketTotal - purchaseTotal;
+                    const hasMarketData = activeCattle.some(c => c.marketPrice && c.marketPrice > 0);
+                    
+                    // Always show if there's market data, even if difference is 0
+                    if (hasMarketData) {
+                      return (
+                        <div className={`flex items-center text-white/90 rounded-full px-3 py-2 ${
+                          difference > 0 ? 'bg-green-500/30' : difference < 0 ? 'bg-red-500/30' : 'bg-yellow-500/30'
+                        }`}>
+                          <div className={`w-4 h-4 mr-2 ${
+                            difference > 0 ? 'text-green-200' : difference < 0 ? 'text-red-200' : 'text-yellow-200'
+                          }`}>
+                            {difference > 0 ? '↗' : difference < 0 ? '↘' : '→'}
+                          </div>
+                          <div className="flex flex-col text-center">
+                            <span className="font-semibold text-xs">
+                              {difference > 0 ? 'Potential Gain' : difference < 0 ? 'Potential Loss' : 'Break Even'}
+                            </span>
+                            <span className={`font-bold text-sm ${
+                              difference > 0 ? 'text-green-200' : difference < 0 ? 'text-red-200' : 'text-yellow-200'
+                            }`}>
+                              ₨{Math.abs(difference).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    // Debug: Show market data status when no market data available
+                    return (
+                      <div className="flex items-center text-white/90 bg-gray-500/30 rounded-full px-3 py-2">
+                        <div className="w-4 h-4 mr-2 text-gray-200">ⓘ</div>
+                        <div className="flex flex-col text-center">
+                          <span className="font-semibold text-xs">Market Data</span>
+                          <span className="font-bold text-sm text-gray-200">Not Available</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <div className="flex items-center text-white/90 bg-white/20 rounded-full px-4 py-2">
-                    <Award className="w-5 h-5 mr-2 text-green-200" />
+                    <Award className="w-5 h-5 mr-2 text-yellow-200" />
                     <span className="font-semibold">{cattleData.length ? Math.round(cattleData.reduce((sum, c) => sum + c.age, 0) / cattleData.length) : 0} Avg. Age</span>
                   </div>
                 </div>
@@ -422,10 +480,14 @@ export default function CattleManagement() {
                           <p className="text-sm font-bold text-gray-800">{cattle.age} years</p>
                         </div>
                         <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl group-hover:from-green-50 group-hover:to-emerald-50 transition-all duration-300">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Value</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Purchase</p>
                           <p className="text-sm font-bold text-gray-800 truncate">₨{cattle.purchasePrice?.toLocaleString() || 'N/A'}</p>
                         </div>
                         <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl group-hover:from-green-50 group-hover:to-emerald-50 transition-all duration-300">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Market</p>
+                          <p className="text-sm font-bold text-green-600 truncate">₨{cattle.marketPrice?.toLocaleString() || 'N/A'}</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl group-hover:from-green-50 group-hover:to-emerald-50 transition-all duration-300 col-span-2">
                           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Added</p>
                           <p className="text-sm font-bold text-gray-800 truncate">{formatDate(cattle.purchaseDate)}</p>
                         </div>
@@ -468,7 +530,8 @@ export default function CattleManagement() {
                         <th className="text-left p-6 font-semibold text-gray-700">Cattle</th>
                         <th className="text-left p-6 font-semibold text-gray-700">Type/Breed</th>
                         <th className="text-left p-6 font-semibold text-gray-700">Age</th>
-                        <th className="text-left p-6 font-semibold text-gray-700">Value</th>
+                        <th className="text-left p-6 font-semibold text-gray-700">Purchase Price</th>
+                        <th className="text-left p-6 font-semibold text-gray-700">Market Price</th>
                         <th className="text-left p-6 font-semibold text-gray-700">Date Added</th>
                         <th className="text-left p-6 font-semibold text-gray-700">Status</th>
                         <th className="text-left p-6 font-semibold text-gray-700">Actions</th>
@@ -507,7 +570,10 @@ export default function CattleManagement() {
                             <span className="font-medium text-gray-800">{cattle.age} years</span>
                           </td>
                           <td className="p-6">
-                            <span className="font-bold text-green-600">₨{cattle.purchasePrice?.toLocaleString() || 'N/A'}</span>
+                            <span className="font-bold text-blue-600">₨{cattle.purchasePrice?.toLocaleString() || 'N/A'}</span>
+                          </td>
+                          <td className="p-6">
+                            <span className="font-bold text-green-600">₨{cattle.marketPrice?.toLocaleString() || 'N/A'}</span>
                           </td>
                           <td className="p-6">
                             <span className="text-gray-600">{formatDate(cattle.purchaseDate)}</span>
@@ -616,10 +682,14 @@ export default function CattleManagement() {
                           <p className="font-medium text-gray-800">{cattle.age} years</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 font-medium">Value</p>
-                          <p className="font-bold text-green-600">₨{cattle.purchasePrice?.toLocaleString() || 'N/A'}</p>
+                          <p className="text-sm text-gray-500 font-medium">Purchase Price</p>
+                          <p className="font-bold text-blue-600">₨{cattle.purchasePrice?.toLocaleString() || 'N/A'}</p>
                         </div>
                         <div>
+                          <p className="text-sm text-gray-500 font-medium">Market Price</p>
+                          <p className="font-bold text-green-600">₨{cattle.marketPrice?.toLocaleString() || 'N/A'}</p>
+                        </div>
+                        <div className="col-span-2">
                           <p className="text-sm text-gray-500 font-medium">Date Added</p>
                           <p className="text-gray-600 text-sm">{formatDate(cattle.purchaseDate)}</p>
                         </div>
@@ -784,6 +854,25 @@ export default function CattleManagement() {
                   className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-base sm:text-lg transition-all duration-200"
                   required
                 />
+              </div>
+
+              {/* Market Price */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                  Current Market Price (PKR) <span className="text-gray-400 text-sm font-normal">(Optional)</span>
+                </label>
+                <input
+                  type="number"
+                  name="marketPrice"
+                  value={formData.marketPrice}
+                  onChange={handleInputChange}
+                  placeholder="Enter current market value in PKR"
+                  min="0"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 text-base sm:text-lg transition-all duration-200"
+                />
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
+                  Current market value helps track profit/loss potential
+                </p>
               </div>
 
               {/* Age */}
@@ -955,6 +1044,29 @@ export default function CattleManagement() {
                   />
                 </div>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">Enter the purchase price in Pakistani Rupees (PKR)</p>
+              </div>
+
+              {/* Market Price */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                  Current Market Price (PKR) <span className="text-gray-400 text-sm font-normal">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium text-base sm:text-lg">₨</span>
+                  <input
+                    type="number"
+                    name="marketPrice"
+                    value={formData.marketPrice}
+                    onChange={handleInputChange}
+                    placeholder="0"
+                    min="0"
+                    step="1"
+                    className="w-full pl-8 sm:pl-12 pr-4 sm:pr-6 py-3 sm:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50/50 text-base sm:text-lg transition-all duration-200"
+                  />
+                </div>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
+                  Current market value helps track profit/loss and investment performance
+                </p>
               </div>
 
               {/* Age */}

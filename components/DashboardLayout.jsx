@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { useAuth } from '../contexts/AuthContext'
 // import { Cow } from 'lucide-react'; // Commenting out Cow import
-import { Circle, Milk, Users, BarChart, DollarSign } from 'lucide-react';
+import { Circle, Milk, Users, BarChart, DollarSign, LogOut, User } from 'lucide-react';
 
 export default function DashboardLayout({ children, title }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { user, logout } = useAuth()
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart, color: 'text-blue-600', path: '/' },
@@ -29,20 +31,43 @@ export default function DashboardLayout({ children, title }) {
     router.push(item.path)
   }
 
+  const handleLogout = async () => {
+    await logout()
+    router.push('/login')
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       
       {/* Top Logo Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm py-4 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <img 
-            src="/images/mela-dairy-logo.png" 
-            alt="Mela Dairy Logo" 
-            className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-          />
-          <div className="ml-3 sm:ml-4">
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900">Mela Dairy Farm</h1>
-            <p className="text-xs sm:text-sm text-gray-600">Farm Management System</p>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <img 
+              src="/images/mela-dairy-logo.png" 
+              alt="Mela Dairy Logo" 
+              className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+            />
+            <div className="ml-3 sm:ml-4">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900">Mela Dairy Farm</h1>
+              <p className="text-xs sm:text-sm text-gray-600">Farm Management System</p>
+            </div>
+          </div>
+          
+          {/* User Menu */}
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
+              <User className="w-4 h-4" />
+              <span>Welcome, {user?.name || user?.username || 'User'}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </div>
       </header>
